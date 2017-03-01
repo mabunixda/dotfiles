@@ -1,6 +1,6 @@
 docker rm -f vscode 
 
-docker run -d \
+docker run --rm -d \
     -e DISPLAY=unix$DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v $HOME:/home/user \

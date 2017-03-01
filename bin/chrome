@@ -1,6 +1,14 @@
-docker rm -f chrome
+#!/bin/bash
 
-docker run -it \
+
+variant="$1"
+if [ -z "$variant" ]; then
+	variant="stable"
+fi
+
+echo $variant
+
+docker run -it --rm \
 	--net host \
 	--cpuset-cpus 0 \
 	--memory 512mb \
@@ -9,7 +17,7 @@ docker run -it \
 	-v $HOME/Downloads:/home/chrome/Downloads \
 	-v $HOME/.config/google-chrome/:/data \
 	-v /dev/shm:/dev/shm \
-	--security-opt seccomp=$HOME/dockerfiles/chrome/stable/chrome.json \
+	--security-opt seccomp=$HOME/dockerfiles/chrome/chrome.json \
 	--device /dev/snd \
 	--name chrome \
-	chrome:stable
+	chrome:$variant
