@@ -148,7 +148,6 @@
 	autocorrect = 1
 
 [merge]
-
 	# Include summaries of merged commits in newly created merge commit messages
 	log = true
 
@@ -176,7 +175,7 @@
 
 	insteadOf = "gist:"
 
-[user]
+#[user]
 #	name = Martin Buichleitner
 #	email = mabunixda@gmail.com
 #	signingkey = 0x18F3685C0022BFF3
@@ -189,8 +188,8 @@
 [github]
 	user = mabunixda
 
-[commit]
-	gpgsign = true
+#[commit]
+#	gpgsign = true
 
 [http]
 	cookiefile = ~/.gitcookies
@@ -201,7 +200,6 @@
 
 [credential]
 	helper = store --file ~/.git-credentials
-	helper = cache --timeout 30000
 [user]
 	email = mabunixda@gmail.com
 	name = Martin Buchleitner
