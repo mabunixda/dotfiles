@@ -1,0 +1,24 @@
+#!/bin/bash
+
+ACTION=""
+DEVICE=""
+
+while getopts ":a:d:" opt; do
+  case $opt in
+    a) ACTION="$OPTARG"
+    ;;
+    d) DEVICE="$OPTARG"
+    ;;
+    \?) echo "Invalid option -$OPTARG" >&2
+    ;;
+  esac
+done
+
+case $ACTION in 
+    add)
+        ln -sf $DEVICE /dev/usb/yubikey
+        ;;
+    remove)
+        rm /dev/usb/yubikey
+        ;;
+    esac

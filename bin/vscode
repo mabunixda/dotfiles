@@ -1,9 +1,24 @@
-docker rm -f vscode 
+#!/bin/bash
 
-docker run --rm -d \
-    -e DISPLAY=unix$DISPLAY \
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -v $HOME:/home/user \
-    --device /dev/dri \
-    --name vscode \
-    vscode
+set -o pipefail
+
+vscode(){
+    vscode_exists=$(docker ps -q -f Name=vscode 2>/dev/null)
+    if [[ -z "$vscode_exists" ]]; then
+        docker run -it -d \
+        -e DISPLAY=unix$DISPLAY \
+        -v /tmp/.X11-unix:/tmp/.X11-unix \
+        -v $HOME:/home/user \
+        -v /opt:/opt \
+        --device /dev/dri \
+        --name vscode \
+        vscode \
+        "$@"
+    fi
+    vscode_state=$(docker inspect --format "{{.State.Running}}" vscode 2>/dev/null)
+	if [[ "$vscode_state" == "true" ]]; then
+		docker exec -i vscode /usr/bin/code -n "$@"  2>/dev/null
+    fi
+
+}
+vscode "$@"
