@@ -1,5 +1,0 @@
-ACTION=="add|change", SUBSYSTEM="usb", \
-	ATTRS{idVendor}=="1050", ATTRS{idProduct}=="0407", \
-	RUN+="/usr/local/bin/yubikey-added -a $env{ACTION} -d $env{DEVNAME}"
-
-ACTION=="add|change", KERNEL=="hidraw", SUBSYSTEM=="hidrawn", ATTRS{idVendor}=="1050", ATTRS{idProduct}=="0407", TAG+="uaccess"
