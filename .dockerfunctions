@@ -1,0 +1,207 @@
+#!/bin/bash
+#
+# Helper Functions
+#
+dcleanup(){
+	local containers
+	containers=( $(docker ps -aq 2>/dev/null) )
+	docker rm "${containers[@]}" 2>/dev/null
+	local volumes
+	volumes=( $(docker ps --filter status=exited -q 2>/dev/null) )
+	docker rm -v "${volumes[@]}" 2>/dev/null
+	local images
+	images=( $(docker images --filter dangling=true -q 2>/dev/null) )
+	docker rmi "${images[@]}" 2>/dev/null
+}
+del_stopped(){
+	local name=$1
+	local state
+	state=$(docker inspect --format "{{.State.Running}}" "$name" 2>/dev/null)
+	
+	if [[ "$state" == "false" ]]; then
+		docker rm "$name"
+	fi
+}
+relies_on(){
+	for container in "$@"; do
+		local state
+		state=$(docker inspect --format "{{.State.Running}}" "$container" 2>/dev/null)
+
+		if [[ "$state" == "false" ]] || [[ "$state" == "" ]]; then
+			echo "$container is not running, starting it for you."
+			$container
+		fi
+	done
+}
+cadvisor(){
+	docker run -d \
+		--restart always \
+		-v /:/rootfs:ro \
+		-v /var/run:/var/run:rw \
+		-v /sys:/sys:ro  \
+		-v /var/lib/docker/:/var/lib/docker:ro \
+		-p 1234:8080 \
+		--name cadvisor \
+		google/cadvisor
+
+	hostess add cadvisor "$(docker inspect --format '{{.NetworkSettings.Networks.bridge.IPAddress}}' cadvisor)"
+	browser-exec "http://cadvisor:8080"
+}
+chrome(){
+	# add flags for proxy if passed
+	local proxy=
+	local map
+	local args=$*
+	if [[ "$1" == "tor" ]]; then
+		relies_on torproxy
+
+		map="MAP * ~NOTFOUND , EXCLUDE torproxy"
+		proxy="socks5://torproxy:9050"
+		args="https://check.torproject.org/api/ip ${*:2}"
+	fi
+
+	del_stopped chrome
+
+#		--device /dev/dri \
+#		--device /dev/video0 \
+	# one day remove /etc/hosts bind mount when effing
+	# overlay support inotify, such bullshit
+	docker run  -d \
+		--memory 3gb \
+		-v /etc/localtime:/etc/localtime:ro \
+		-v /tmp/.X11-unix:/tmp/.X11-unix \
+		-e "DISPLAY=unix${DISPLAY}" \
+		-v "$HOME/Downloads:/home/chrome/Downloads"" \
+		-v "$HOME/.config/google-chrome/:/data \
+		-v "${HOME}/Pictures:/home/chrome/Pictures" \
+		-v "${HOME}/Torrents:/home/chrome/Torrents" \
+		-v /dev/shm:/dev/shm \
+		-v /etc/hosts:/etc/hosts \
+		-v /dev/shm:/dev/shm \
+		--device /dev/hidraw4 \
+		--device /dev/hidraw5 \
+		--device /dev/usb \
+		--device /dev/bus/usb \
+		--group-add audio \
+		--group-add video \
+		--security-opt seccomp:$HOME/dotfiles/etc/docker/seccomp/chrome.json \
+		--device /dev/snd \
+		--name chrome \
+		chrome:stable --user-data-dir=/data \
+		--proxy-server="$proxy" \
+		--host-resolver-rules="$map" "$args"
+
+}
+firefox(){
+	del_stopped firefox
+
+	docker run  \
+		--memory 2gb \
+		--net host \
+		--cpuset-cpus 0 \
+		-v /etc/localtime:/etc/localtime:ro \
+		-v /tmp/.X11-unix:/tmp/.X11-unix \
+		-v "${HOME}/.firefox/cache:/root/.cache/mozilla" \
+		-v "${HOME}/.firefox/mozilla:/root/.mozilla" \
+		-v "${HOME}/Downloads:/root/Downloads" \
+		-v "${HOME}/Pictures:/root/Pictures" \
+		-v "${HOME}/Torrents:/root/Torrents" \
+		-e "DISPLAY=unix${DISPLAY}" \
+		-e GDK_SCALE \
+		-e GDK_DPI_SCALE \
+		--device /dev/snd \
+		--device /dev/dri \
+		--name firefox \
+		firefox "$@"
+}
+htop(){
+	docker run --rm -it \
+		--pid host \
+		--net none \
+		--name htop \
+		${DOCKER_REPO_PREFIX}/htop
+}
+pulseaudio(){
+	del_stopped pulseaudio
+
+	docker run -d \
+		-v /etc/localtime:/etc/localtime:ro \
+		--device /dev/snd \
+		-p 4713:4713 \
+		--restart always \
+		--group-add audio \
+		--name pulseaudio \
+		pulseaudio
+}
+skype(){
+	del_stopped skype
+	relies_on pulseaudio
+
+	docker run -d \
+		-v /etc/localtime:/etc/localtime:ro \
+		-v /tmp/.X11-unix:/tmp/.X11-unix \
+		-e "DISPLAY=unix${DISPLAY}" \
+		--link pulseaudio:pulseaudio \
+		-e PULSE_SERVER=pulseaudio \
+		--security-opt seccomp:unconfined \
+		--device /dev/video0 \
+		--group-add video \
+		--group-add audio \
+		--name skype \
+		skype
+}
+spotify(){
+	del_stopped spotify
+
+	docker run -d \
+		-v /etc/localtime:/etc/localtime:ro \
+		-v /tmp/.X11-unix:/tmp/.X11-unix \
+		-e "DISPLAY=unix${DISPLAY}" \
+		-e QT_DEVICE_PIXEL_RATIO \
+		--security-opt seccomp:unconfined \
+		--device /dev/snd \
+		--device /dev/dri \
+		--group-add audio \
+		--group-add video \
+		--name spotify \
+		spotify
+}
+vscode(){
+	del_stopped vscode
+
+	docker run -d \
+    -e DISPLAY=unix$DISPLAY \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -v $HOME:/home/user \
+    --device /dev/dri \
+    --name vscode \
+    vscode
+}
+
+
+###
+### Awesome sauce by @jpetazzo
+###
+command_not_found_handle () {
+	# Check if there is a container image with that name
+	if ! docker inspect --format '{{ .Author }}' "$1" >&/dev/null ; then
+		echo "$0: $1: command not found"
+		return
+	fi
+
+	# Check that it's really the name of the image, not a prefix
+	if docker inspect --format '{{ .Id }}' "$1" | grep -q "^$1" ; then
+		echo "$0: $1: command not found"
+		return
+	fi
+
+	docker run -ti -u "$(whoami)" -w "$HOME" \
+		"$(env | cut -d= -f1 | awk '{print "-e", $1}')" \
+		--device /dev/snd \
+		-v /etc/passwd:/etc/passwd:ro \
+		-v /etc/group:/etc/group:ro \
+		-v /etc/localtime:/etc/localtime:ro \
+		-v /home:/home \
+		-v /tmp/.X11-unix:/tmp/.X11-unix \
+		"${DOCKER_REPO_PREFIX}/${1}" "$@"
+}
