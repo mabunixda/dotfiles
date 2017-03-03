@@ -41,13 +41,15 @@ avlsocks() {
 		docker network create socks
 	fi
 
-		docker run -it   \
+		docker run -d  \
 			-v $HOME/.ssh/id_rsa:/home/client/.ssh/id_rsa:ro \
 			-v $HOME/.ssh/config:/home/client/.ssh/config:rw \
 			-v $HOME/.ssh/known_hosts:/home/client/.ssh/known_hosts:rw \
 			-v $SSH_AUTH_SOCK:/ssh-agent \
 			--env SSH_AUTH_SOCK=/ssh-agent \
+			-p 127.0.0.1:1080:1080 \
 			--network socks \
+			--privileged \
 			--name avlsocks \
 			avlsocksproxy 
 
@@ -140,7 +142,19 @@ htop(){
 		--pid host \
 		--net none \
 		--name htop \
-		${DOCKER_REPO_PREFIX}/htop
+		htop
+}
+loxconfig() {
+
+	docker run --rm -it \
+		-v /etc/localtime:/etc/localtime:ro \
+		--cpuset-cpus 0 \
+		-v /tmp/.X11-unix:/tmp/.X11-unix  \
+		-e DISPLAY=unix$DISPLAY \
+		--device /dev/snd:/dev/snd \
+		--name loxconfig-wine-8.1 \
+		loxconfig-wine:8.1 \
+ 		wine "C:\Program Files (x86)\Loxone\LoxoneConfig\LoxoneConfig.exe"
 }
 pulseaudio(){
 	del_stopped pulseaudio
@@ -199,6 +213,17 @@ vscode(){
     vscode
 }
 
+wine() {
+
+	docker run --rm -it \
+		-v /etc/localtime:/etc/localtime:ro \
+		--cpuset-cpus 0 \
+		-v /tmp/.X11-unix:/tmp/.X11-unix  \
+		-e DISPLAY=unix$DISPLAY \
+		--device /dev/snd:/dev/snd \
+		wine \
+ 		bash
+}
 
 ###
 ### Awesome sauce by @jpetazzo
