@@ -82,6 +82,10 @@ chrome(){
 	fi
 
 	del_stopped chrome
+		#--device /dev/hidraw4 \
+		#--device /dev/hidraw5 \
+		#--device /dev/usb \
+		#--device /dev/bus/usb \
 
 #		--device /dev/dri \
 #		--device /dev/video0 \
@@ -99,10 +103,6 @@ chrome(){
 		-v /dev/shm:/dev/shm \
 		-v /etc/hosts:/etc/hosts \
 		-v /dev/shm:/dev/shm \
-		--device /dev/hidraw4 \
-		--device /dev/hidraw5 \
-		--device /dev/usb \
-		--device /dev/bus/usb \
 		--group-add audio \
 		--group-add video \
 		--security-opt seccomp:$HOME/dotfiles/etc/docker/seccomp/chrome.json \
