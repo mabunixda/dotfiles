@@ -40,12 +40,16 @@ avlsocks() {
 	if [[ "$network_state" == "" ]]; then
 		docker network create socks
 	fi
-	docker run -it  \
-		-v $HOME/.ssh/id_rsa:/home/client/.ssh/id_rsa:ro \
-		-v $HOME/.ssh/known_hosts:/home/client/.ssh/known_hosts:rw \
-		--network socks \
-		--name avlsocks \
-		avlsocksproxy 
+
+		docker run -it   \
+			-v $HOME/.ssh/id_rsa:/home/client/.ssh/id_rsa:ro \
+			-v $HOME/.ssh/config:/home/client/.ssh/config:rw \
+			-v $HOME/.ssh/known_hosts:/home/client/.ssh/known_hosts:rw \
+			-v $SSH_AUTH_SOCK:/ssh-agent \
+			--env SSH_AUTH_SOCK=/ssh-agent \
+			--network socks \
+			--name avlsocks \
+			avlsocksproxy 
 
 }
 cadvisor(){
@@ -81,7 +85,7 @@ chrome(){
 #		--device /dev/video0 \
 	# one day remove /etc/hosts bind mount when effing
 	# overlay support inotify, such bullshit
-	docker run  -it \
+	docker run  -d \
 		--memory 3gb \
 		-v /etc/localtime:/etc/localtime:ro \
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
