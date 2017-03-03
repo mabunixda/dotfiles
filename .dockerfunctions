@@ -146,7 +146,7 @@ htop(){
 }
 loxconfig() {
 
-	docker run --rm -it \
+	docker run --rm -d \
 		-v /etc/localtime:/etc/localtime:ro \
 		--cpuset-cpus 0 \
 		-v /tmp/.X11-unix:/tmp/.X11-unix  \
