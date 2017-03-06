@@ -33,6 +33,15 @@ relies_on(){
 		fi
 	done
 }
+ansible() {
+	del_stopped ansible
+
+	docker run --rm -it \
+		-v $HOME:/root \
+		--name ansible \
+		ansible \
+		$@
+}
 avlsocks() {
 	del_stopped avlsocks
 
@@ -91,7 +100,7 @@ chrome(){
 #		--device /dev/video0 \
 	# one day remove /etc/hosts bind mount when effing
 	# overlay support inotify, such bullshit
-	docker run  -d \
+	docker run  -it \
 		--memory 3gb \
 		-v /etc/localtime:/etc/localtime:ro \
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
@@ -101,11 +110,11 @@ chrome(){
 		-v "${HOME}/Pictures:/home/chrome/Pictures" \
 		-v "${HOME}/Torrents:/home/chrome/Torrents" \
 		-v /dev/shm:/dev/shm \
+		-v /dev/dri:/dev/dri \
 		-v /etc/hosts:/etc/hosts \
-		-v /dev/shm:/dev/shm \
+		--privileged \
 		--group-add audio \
 		--group-add video \
-		--security-opt seccomp:$HOME/dotfiles/etc/docker/seccomp/chrome.json \
 		--device /dev/snd \
 		--network socks \
 		--name chrome \
@@ -113,6 +122,9 @@ chrome(){
 		--user-data-dir=/data \
 		--proxy-server="$proxy" \
 		--host-resolver-rules="$map" "$args"
+
+# 		--security-opt seccomp:$HOME/dotfiles/etc/docker/seccomp/chrome.json \
+
 
 }
 firefox(){
