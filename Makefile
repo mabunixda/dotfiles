@@ -12,7 +12,7 @@ bin:
 
 dotfiles:
 	# add aliases for dotfiles
-	for file in $(shell find $(CURDIR) -name ".*" -not -name ".ssh" -not -name ".gitignore" -not -name ".travis.yml" -not -name ".git" -not -name ".*.swp" -not -name ".travis.yml" -not -name ".irssi" -not -name ".gnupg"); do \
+	for file in $(shell find $(CURDIR) -name ".*" -not -name ".ssh" -not -name ".gitignore" -not -name ".travis.yml" -not -name ".git" -not -name ".*.swp" -not -name ".travis.yml" -not -name ".irssi" -not -name ".gnupg" -not -name ".config"); do \
         if [ -f $$file ]; then \
     		f=$$(basename $$file); \
 	    	ln -sfn $$file $(HOME)/$$f; \
