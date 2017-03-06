@@ -63,6 +63,13 @@ avlsocks() {
 			avlsocksproxy 
 
 }
+betaflight() {
+	docker exec -it chrome \
+	/opt/google/chrome/google-chrome \
+		--user-data-dir=/data \
+		--profile-directory=Default \
+		--app-id=kdaghagfopacdngbohiknlhcocjccjao
+}
 cadvisor(){
 	docker run -d \
 		--restart always \
@@ -167,6 +174,15 @@ loxconfig() {
 		--name loxconfig-wine-8.1 \
 		loxconfig-wine:8.1 \
  		wine "C:\Program Files (x86)\Loxone\LoxoneConfig\LoxoneConfig.exe"
+}
+postman() {
+
+	docker exec -it chrome \
+	/opt/google/chrome/google-chrome \
+		--user-data-dir=/data \
+		--profile-directory=Default \
+		--app-id=fhbjgbiflinjbdggehcddcbncdddomop
+
 }
 pulseaudio(){
 	del_stopped pulseaudio
