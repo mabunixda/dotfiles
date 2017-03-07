@@ -2,6 +2,9 @@
 #
 # Helper Functions
 #
+
+DOCKER_REPO="r.nitram.at"
+
 dcleanup(){
 	local containers
 	containers=( $(docker ps -aq 2>/dev/null) )
@@ -139,7 +142,7 @@ chrome(){
 		--device /dev/snd \
 		--network socks \
 		--name chrome \
-		chrome:stable \
+		${DOCKER_REPO}/chrome:stable \
 		--user-data-dir=/data \
 		--proxy-server="$proxy" \
 		--host-resolver-rules="$map" "$args"
@@ -168,14 +171,14 @@ firefox(){
 		--device /dev/snd \
 		--device /dev/dri \
 		--name firefox \
-		firefox "$@"
+		${DOCKER_REPO}/firefox "$@"
 }
 htop(){
 	docker run --rm -it \
 		--pid host \
 		--net none \
 		--name htop \
-		htop
+		${DOCKER_REPO}/htop
 }
 loxconfig() {
 
@@ -186,7 +189,7 @@ loxconfig() {
 		-e DISPLAY=unix$DISPLAY \
 		--device /dev/snd:/dev/snd \
 		--name loxconfig-wine-8.1 \
-		loxconfig-wine:8.1 \
+		${DOCKER_REPO}/loxconfig-wine:8.1 \
  		wine "C:\Program Files (x86)\Loxone\LoxoneConfig\LoxoneConfig.exe"
 }
 postman() {
@@ -210,7 +213,7 @@ pulseaudio(){
 		--restart always \
 		--group-add audio \
 		--name pulseaudio \
-		pulseaudio
+		${DOCKER_REPO}/pulseaudio
 }
 
 reg() {
@@ -237,7 +240,7 @@ skype(){
 		--group-add video \
 		--group-add audio \
 		--name skype \
-		skype
+		${DOCKER_REPO}/skype
 }
 spotify(){
 	del_stopped spotify
@@ -254,7 +257,7 @@ spotify(){
 		--group-add audio \
 		--group-add video \
 		--name spotify \
-		spotify
+		${DOCKER_REPO}/spotify
 }
 vscode(){
 	del_stopped vscode
@@ -265,7 +268,7 @@ vscode(){
     -v $HOME:/home/user \
     --device /dev/dri \
     --name vscode \
-    vscode
+    ${DOCKER_REPO}/vscode
 }
 
 wine() {
@@ -276,7 +279,7 @@ wine() {
 		-v /tmp/.X11-unix:/tmp/.X11-unix  \
 		-e DISPLAY=unix$DISPLAY \
 		--device /dev/snd:/dev/snd \
-		wine \
+		${DOCKER_REPO}/wine \
  		bash
 }
 
@@ -304,5 +307,5 @@ command_not_found_handle () {
 		-v /etc/localtime:/etc/localtime:ro \
 		-v /home:/home \
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
-		"${DOCKER_REPO_PREFIX}/${1}" "$@"
+		"${DOCKER_REPO}/${1}" "$@"
 }
