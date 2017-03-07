@@ -175,21 +175,12 @@
 
 	insteadOf = "gist:"
 
-#[user]
-#	name = Martin Buichleitner
-#	email = mabunixda@gmail.com
-#	signingkey = 0x18F3685C0022BFF3
-
-# Uncomment if you want fetch to also get all github pull requests, this is rather
-# large on big repos.
-#[remote "origin"]
-	#fetch = +refs/pull/*/head:refs/remotes/origin/pull/*
-
+	
 [github]
 	user = mabunixda
 
-#[commit]
-#	gpgsign = true
+[commit]
+	gpgsign = true
 
 [http]
 	cookiefile = ~/.gitcookies
@@ -203,3 +194,4 @@
 [user]
 	email = mabunixda@gmail.com
 	name = Martin Buchleitner
+	signingkey = 0xA8ABD9661A093431

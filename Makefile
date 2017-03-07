@@ -12,13 +12,14 @@ bin:
 
 dotfiles:
 	# add aliases for dotfiles
-	for file in $(shell find $(CURDIR) -name ".*" -not -name ".ssh" -not -name ".gitignore" -not -name ".travis.yml" -not -name ".git" -not -name ".*.swp" -not -name ".travis.yml" -not -name ".irssi" -not -name ".gnupg" -not -name ".config"); do \
+	for file in $(shell find $(CURDIR) -name ".*" -not -name ".gitconfig" -not -name ".ssh" -not -name ".gitignore" -not -name ".travis.yml" -not -name ".git" -not -name ".*.swp" -not -name ".travis.yml" -not -name ".irssi" -not -name ".gnupg" -not -name ".config"); do \
         if [ -f $$file ]; then \
     		f=$$(basename $$file); \
 	    	ln -sfn $$file $(HOME)/$$f; \
         fi; \
 	done; \
-	ln -sfn $(CURDIR)/.gnupg/gpg.conf $(HOME)/.gnupg/gpg.conf;
+	ln -sfn $(CURDIR)/.gnupg/gpg.conf $(HOME)/.gnupg/gpg.conf; \
+	ln -sfn $(CURDIR)/.gitconfig $(HOME)/.gitconfig-private;
 #	ln -sfn $(CURDIR)/.gnupg/gpg-agent.conf $(HOME)/.gnupg/gpg-agent.conf;
 #	ln -fn $(CURDIR)/gitignore $(HOME)/.gitignore;
 

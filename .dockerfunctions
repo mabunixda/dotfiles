@@ -33,15 +33,26 @@ relies_on(){
 		fi
 	done
 }
-ansible() {
-	del_stopped ansible
-
-	docker run --rm -it \
-		-v $HOME:/root \
-		--name ansible \
-		ansible \
-		$@
-}
+#ansible() {
+#	del_stopped ansible
+#
+#	docker run --rm -it \
+#		-v $HOME:/root \
+#		-v $PWD/hosts:/etc/ansible/hosts \
+#		--name ansible \
+#		ansible \
+#		ansible $@
+#}
+#ansible-vault() {
+#	del_stopped ansible
+#
+#	docker run --rm -it \
+#		-v $HOME:/root \
+#		-v $PWD/hosts:/etc/ansible/hosts \
+#		--name ansible \
+#		ansible \
+#		ansible-vault $@
+#}
 avlsocks() {
 	del_stopped avlsocks
 
@@ -64,6 +75,9 @@ avlsocks() {
 
 }
 betaflight() {
+
+	relies_on chrome
+
 	docker exec -it chrome \
 	/opt/google/chrome/google-chrome \
 		--user-data-dir=/data \
@@ -177,6 +191,8 @@ loxconfig() {
 }
 postman() {
 
+	relies_on chrome
+
 	docker exec -it chrome \
 	/opt/google/chrome/google-chrome \
 		--user-data-dir=/data \
@@ -195,6 +211,16 @@ pulseaudio(){
 		--group-add audio \
 		--name pulseaudio \
 		pulseaudio
+}
+
+reg() {
+	echo "$@"
+	del_stopped reg
+	docker run -it --rm \
+	    -v ${HOME}/.docker:/root/.docker \
+		--name reg \
+		r.j3ss.co/reg \
+		"$@"
 }
 skype(){
 	del_stopped skype

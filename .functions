@@ -1,1 +1,12 @@
 #!/bin/bash
+
+setgit() {
+    MOD="$1"
+    if [ -z "$MOD" ]; then 
+        MOD="private"
+    fi
+    if [ -f  "${HOME}/.gitconfig-$MOD" ]; then
+        echo "switching git to $MOD"
+        ln -sfn "$HOME/.gitconfig-$MOD" "$HOME/.gitconfig"
+    fi
+}
