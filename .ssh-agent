@@ -5,13 +5,11 @@ SSH_ENV="$HOME/.ssh/environment"
 function start_agent {
     mkdir -p ~/.ssh/master
     mkdir -p ~/.ssh/config.d
-    echo "Initialising new SSH agent..."
-    /usr/bin/ssh-agent | sed 's/^echo/#echo/' > "${SSH_ENV}"
-    echo succeeded
+    /usr/bin/ssh-agent -s | sed 's/^echo/#echo/' > "${SSH_ENV}"
     chmod 600 "${SSH_ENV}"
     . "${SSH_ENV}" > /dev/null
     for file in $( find ${HOME}/.ssh/ -name "id_?sa*" -not -name "*.*" ); do
-    	/usr/bin/ssh-add $file;
+    	/usr/bin/ssh-add $file > /dev/null;
     done
 }
 
