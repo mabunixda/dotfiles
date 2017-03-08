@@ -291,7 +291,7 @@ virt-manager() {
 		${DOCKER_REPO}/virt-manager 
 }
 vscode(){
-	del_stopped vscode force
+	del_stopped vscode 
 
 	docker run -d \
 	    -e DISPLAY=unix$DISPLAY \
