@@ -18,11 +18,16 @@ dcleanup(){
 }
 del_stopped(){
 	local name=$1
+	local force=$2
 	local state
 	state=$(docker inspect --format "{{.State.Running}}" "$name" 2>/dev/null)
 	
 	if [[ "$state" == "false" ]]; then
 		docker rm "$name"
+	else 
+		if [[ "$force" == "force" ]]; then
+			docker rm -f "$name"
+		fi
 	fi
 }
 relies_on(){
@@ -120,8 +125,6 @@ chrome(){
 		#--device /dev/usb \
 		#--device /dev/bus/usb \
 
-#		--device /dev/dri \
-#		--device /dev/video0 \
 	# one day remove /etc/hosts bind mount when effing
 	# overlay support inotify, such bullshit
 	docker run  -d \
@@ -140,6 +143,8 @@ chrome(){
 		--group-add audio \
 		--group-add video \
 		--device /dev/snd \
+		--device /dev/dri \
+		--device /dev/video0 \
 		--network socks \
 		--name chrome \
 		${DOCKER_REPO}/chrome:stable \
@@ -172,6 +177,17 @@ firefox(){
 		--device /dev/dri \
 		--name firefox \
 		${DOCKER_REPO}/firefox "$@"
+}
+gitkraken(){
+	del_stopped gitkraken
+
+	docker run -it \
+    -e DISPLAY=unix$DISPLAY \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -v $HOME:/home/user \
+    --device /dev/dri \
+    --name gitkraken \
+    ${DOCKER_REPO}/gitkraken
 }
 htop(){
 	docker run --rm -it \
@@ -226,12 +242,13 @@ reg() {
 		"$@"
 }
 skype(){
-	del_stopped skype
+	del_stopped skype force
 	relies_on pulseaudio
 
 	docker run -d \
 		-v /etc/localtime:/etc/localtime:ro \
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
+                -v $HOME/.Skype:/home/skype/.Skype \
 		-e "DISPLAY=unix${DISPLAY}" \
 		--link pulseaudio:pulseaudio \
 		-e PULSE_SERVER=pulseaudio \
@@ -259,16 +276,31 @@ spotify(){
 		--name spotify \
 		${DOCKER_REPO}/spotify
 }
+virt-manager() {
+	del_stopped virt-manager 
+	echo "$@"
+	docker run -it \
+	    -e DISPLAY=unix$DISPLAY \
+    	-v /tmp/.X11-unix:/tmp/.X11-unix \
+		-v $SSH_AUTH_SOCK:$SSH_AUTH_SOCK \
+	    -v $HOME/.ssh:/home/user/.ssh \
+		-v /usr/share/fonts:/usr/share/fonts:ro \
+		-e SSH_AUTH_SOCK=$SSH_AUTH_SOCK \
+    	--device /dev/dri \
+		--name virt-manager \
+		${DOCKER_REPO}/virt-manager 
+}
 vscode(){
-	del_stopped vscode
+	del_stopped vscode force
 
 	docker run -d \
-    -e DISPLAY=unix$DISPLAY \
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -v $HOME:/home/user \
-    --device /dev/dri \
-    --name vscode \
-    ${DOCKER_REPO}/vscode
+	    -e DISPLAY=unix$DISPLAY \
+    	-v /tmp/.X11-unix:/tmp/.X11-unix \
+	    -v $HOME:/home/user \
+    	--device /dev/dri \
+	    --name vscode \
+    	${DOCKER_REPO}/vscode \
+	"$@"
 }
 
 wine() {
