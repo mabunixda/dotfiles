@@ -181,7 +181,7 @@ firefox(){
 gitkraken(){
 	del_stopped gitkraken
 
-	docker run -it \
+	docker run -d \
     -e DISPLAY=unix$DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v $HOME:/home/user \
