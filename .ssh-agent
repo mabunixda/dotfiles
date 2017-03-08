@@ -10,7 +10,9 @@ function start_agent {
     echo succeeded
     chmod 600 "${SSH_ENV}"
     . "${SSH_ENV}" > /dev/null
-    /usr/bin/ssh-add;
+    for file in $( find ${HOME}/.ssh/ -name "id_?sa*" -not -name "*.*" ); do
+    	/usr/bin/ssh-add $file;
+    done
 }
 
 # Source SSH settings, if applicable"

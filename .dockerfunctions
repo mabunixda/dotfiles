@@ -69,15 +69,14 @@ avlsocks() {
 		docker network create socks
 	fi
 
-		docker run -d  \
-			-v $HOME/.ssh/id_rsa:/home/client/.ssh/id_rsa:ro \
-			-v $HOME/.ssh/config:/home/client/.ssh/config:rw \
-			-v $HOME/.ssh/known_hosts:/home/client/.ssh/known_hosts:rw \
+		docker run -it  \
+			-v $HOME/.ssh/id_rsa:/home/app/.ssh/id_rsa:ro \
+			-v $HOME/.ssh/config:/home/app/.ssh/config:rw \
+			-v $HOME/.ssh/known_hosts:/home/app/.ssh/known_hosts:rw \
 			-v $SSH_AUTH_SOCK:/ssh-agent \
 			--env SSH_AUTH_SOCK=/ssh-agent \
-			-p 127.0.0.1:1080:1080 \
+                        -p 127.0.0.1:1080:1080 \
 			--network socks \
-			--privileged \
 			--name avlsocks \
 			avlsocksproxy 
 
@@ -132,10 +131,10 @@ chrome(){
 		-v /etc/localtime:/etc/localtime:ro \
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
 		-e "DISPLAY=unix${DISPLAY}" \
-		-v "$HOME/Downloads:/home/chrome/Downloads" \
+		-v "$HOME/Downloads:/home/app/Downloads" \
 		-v "$HOME/.config/google-chrome/:/data" \
-		-v "${HOME}/Pictures:/home/chrome/Pictures" \
-		-v "${HOME}/Torrents:/home/chrome/Torrents" \
+		-v "${HOME}/Pictures:/home/app/Pictures" \
+		-v "${HOME}/Torrents:/home/app/Torrents" \
 		-v /dev/shm:/dev/shm \
 		-v /dev/dri:/dev/dri \
 		-v /etc/hosts:/etc/hosts \
@@ -184,7 +183,7 @@ gitkraken(){
 	docker run -d \
     -e DISPLAY=unix$DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -v $HOME:/home/user \
+    -v $HOME:/home/app \
     --device /dev/dri \
     --name gitkraken \
     ${DOCKER_REPO}/gitkraken
@@ -248,7 +247,7 @@ skype(){
 	docker run -d \
 		-v /etc/localtime:/etc/localtime:ro \
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
-                -v $HOME/.Skype:/home/skype/.Skype \
+                -v $HOME/.Skype:/home/app/.Skype \
 		-e "DISPLAY=unix${DISPLAY}" \
 		--link pulseaudio:pulseaudio \
 		-e PULSE_SERVER=pulseaudio \
@@ -265,7 +264,7 @@ spotify(){
 	docker run -d \
 		-v /etc/localtime:/etc/localtime:ro \
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
-		-v "${HOME}/.config/spotify:/home/spotify/.config/spotify" \
+		-v "${HOME}/.config/spotify:/home/app/.config/spotify" \
 		-e "DISPLAY=unix${DISPLAY}" \
 		-e QT_DEVICE_PIXEL_RATIO \
 		--security-opt seccomp:unconfined \
@@ -280,10 +279,10 @@ virt-manager() {
 	del_stopped virt-manager 
 	echo "$@"
 	docker run -it \
-	    -e DISPLAY=unix$DISPLAY \
+                -e DISPLAY=unix$DISPLAY \
     	-v /tmp/.X11-unix:/tmp/.X11-unix \
 		-v $SSH_AUTH_SOCK:$SSH_AUTH_SOCK \
-	    -v $HOME/.ssh:/home/user/.ssh \
+	    -v $HOME/.ssh:/home/app/.ssh \
 		-v /usr/share/fonts:/usr/share/fonts:ro \
 		-e SSH_AUTH_SOCK=$SSH_AUTH_SOCK \
     	--device /dev/dri \
@@ -296,7 +295,7 @@ vscode(){
 	docker run -d \
 	    -e DISPLAY=unix$DISPLAY \
     	-v /tmp/.X11-unix:/tmp/.X11-unix \
-	    -v $HOME:/home/user \
+	    -v $HOME:/home/app \
     	--device /dev/dri \
 	    --name vscode \
     	${DOCKER_REPO}/vscode \
