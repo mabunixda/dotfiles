@@ -16,12 +16,12 @@ dcleanup(){
 	images=( $(docker images --filter dangling=true -q 2>/dev/null) )
 	docker rmi "${images[@]}" 2>/dev/null
 }
+
 del_stopped(){
 	local name=$1
 	local force=$2
 	local state
 	state=$(docker inspect --format "{{.State.Running}}" "$name" 2>/dev/null)
-	
 	if [[ "$state" == "false" ]]; then
 		docker rm "$name"
 	else 
@@ -30,6 +30,7 @@ del_stopped(){
 		fi
 	fi
 }
+
 relies_on(){
 	for container in "$@"; do
 		local state
@@ -145,7 +146,7 @@ chrome(){
 		--network socks \
 		--privileged \
 		--name chrome \
-		${DOCKER_REPO}/chrome:stable \
+		${DOCKER_REPO}/chrome \
 		--user-data-dir=/data \
 		--proxy-server="$proxy" \
 		--host-resolver-rules="$map" "$args"
@@ -222,8 +223,9 @@ postman() {
 pulseaudio(){
 	del_stopped pulseaudio
 
-	docker run -d \
+	docker run -it \
 		-v /etc/localtime:/etc/localtime:ro \
+		-v $HOME/.config/pulse:/home/app/.config/pulse:rw \
 		--device /dev/snd \
 		-p 4713:4713 \
 		--restart always \
@@ -262,7 +264,7 @@ skype(){
 spotify(){
 	del_stopped spotify
 
-	docker run -d \
+	docker run -it \
 		-v /etc/localtime:/etc/localtime:ro \
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
 		-v "${HOME}/.config/spotify:/home/app/.config/spotify" \

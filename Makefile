@@ -8,6 +8,9 @@ bin:
 		f=$$(basename $$file); \
 		sudo ln -sf $$file /usr/local/bin/$$f; \
 	done
+	sudo curl -s -L -o /usr/local/bin/cfssl https://pkg.cfssl.org/R1.2/cfssl_linux-amd64;
+	sudo curl -s -L -o /usr/local/bin/cfssljson https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64;
+	sudo chmod +x /usr/local/bin/{cfssl,cfssljson};
 	sudo ln -sf $(CURDIR)/bin/browser-exec /usr/local/bin/xdg-open; \
 
 dotfiles:
