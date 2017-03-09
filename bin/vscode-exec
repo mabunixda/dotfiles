@@ -1,0 +1,24 @@
+#!/bin/bash
+##############################################################################
+# vscode
+# -----------
+#
+# Usage:
+#	vscode [$file]
+#
+# :authors: Martin Buchleitner, @mabunixda
+# :date: 9 March 2017
+# :version: 0.0.1
+##############################################################################
+#set -e
+set -o pipefail
+
+vscode_exec(){
+	# vscodeheck if chrome container is running
+	chrome_state=$(docker inspect --format "{{.State.Running}}" vscode 2>/dev/null)
+	if [[ "$chrome_state" == "true" ]]; then
+		docker exec -i vscode /usr/bin/code -n "$@" 2>/dev/null
+	fi
+}
+
+vscode_exec "$@"
