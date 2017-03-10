@@ -102,7 +102,7 @@ betaflight() {
 
 	relies_on chrome
 
-	docker exec -it chrome \
+	docker exec -d chrome \
 	/opt/google/chrome/google-chrome \
 		--user-data-dir=/data \
 		--profile-directory=Default \
@@ -144,7 +144,7 @@ chrome(){
 #		--security-opt seccomp:$HOME/dotfiles/etc/docker/seccomp/chrome.json \
 	# one day remove /etc/hosts bind mount when effing
 	# overlay support inotify, such bullshit
-	docker run -it \
+	docker run -d \
 		--memory 3gb \
 		-v /etc/localtime:/etc/localtime:ro \
 		-v /etc/machine-id:/etc/machine-id:ro \
@@ -214,7 +214,7 @@ loxconfig() {
 		variant="beta"
 	fi
 
-	docker run --rm -it \
+	docker run --rm -d \
 		-v /etc/localtime:/etc/localtime:ro \
 		--cpuset-cpus 0 \
 		-v /tmp/.X11-unix:/tmp/.X11-unix  \
@@ -228,7 +228,7 @@ postman() {
 
 	relies_on chrome
 
-	docker exec -it chrome \
+	docker exec -d chrome \
 	/opt/google/chrome/google-chrome \
 		--user-data-dir=/data \
 		--profile-directory=Default \
@@ -238,7 +238,7 @@ postman() {
 pulseaudio(){
 	del_stopped pulseaudio
 	local docker_flags+=$(match_groups "audio")
-	docker run -it \
+	docker run -d \
 		-v /etc/localtime:/etc/localtime:ro \
 		-v $HOME/.config/pulse:/home/app/.config/pulse:rw \
 		--device /dev/snd \
@@ -278,7 +278,7 @@ skype(){
 spotify(){
 	del_stopped spotify
 	local docker_flags+=$(match_groups "audio" "video")
-	docker run -it \
+	docker run -d \
 		-v /etc/localtime:/etc/localtime:ro \
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
 		-v "${HOME}/.config/spotify:/home/app/.config/spotify" \
