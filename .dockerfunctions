@@ -17,6 +17,25 @@ dcleanup(){
 	docker rmi "${images[@]}" 2>/dev/null
 }
 
+match_groups() { 
+	local wanted_groups=$@
+	local docker_flags=
+	for group in ${wanted_groups}; do
+  		gid=$(getent group $group | cut -d: -f3)
+  		[ -z "$gid" ] || docker_flags+=" --group-add=$gid"
+	done
+	echo ${docker_flags}
+}
+
+optional_devices() {
+	local wanted_devices=$@
+	local docker_flags=
+	for dev in ${wanted_devices}; do
+		[ -f "$dev" ] && docker_flags+=" --device $dev" 
+	done
+	echo $docker_flags
+}
+
 del_stopped(){
 	local name=$1
 	local force=$2
@@ -115,15 +134,13 @@ chrome(){
 		proxy="socks5://torproxy:9050"
 		args="https://check.torproject.org/api/ip ${*:2}"
 	fi
+	local docker_flags+=$(match_groups "audio" "video")
+	docker_flags+=$(optional_devices "/dev/hidraw4" "/dev/hidraw5" "/dev/usb" "/dev/bus/usb" )
 
 	del_stopped chrome
-		#--device /dev/hidraw4 \
-		#--device /dev/hidraw5 \
-		#--device /dev/usb \
-		#--device /dev/bus/usb \
-
-#		--device /dev/dri \
 #		--device /dev/video0 \
+#		--device /dev/dri \
+#
 #		--security-opt seccomp:$HOME/dotfiles/etc/docker/seccomp/chrome.json \
 	# one day remove /etc/hosts bind mount when effing
 	# overlay support inotify, such bullshit
@@ -140,8 +157,7 @@ chrome(){
 		-v /dev/shm:/dev/shm \
 		-v /dev/dri:/dev/dri \
 		-v /etc/hosts:/etc/hosts \
-		--group-add audio \
-		--group-add video \
+		${docker_flags} \
 		--device /dev/snd \
 		--network socks \
 		--privileged \
@@ -154,7 +170,6 @@ chrome(){
 }
 firefox(){
 	del_stopped firefox
-
 	docker run  \
 		--memory 2gb \
 		--net host \
@@ -222,14 +237,14 @@ postman() {
 }
 pulseaudio(){
 	del_stopped pulseaudio
-
+	local docker_flags+=$(match_groups "audio")
 	docker run -it \
 		-v /etc/localtime:/etc/localtime:ro \
 		-v $HOME/.config/pulse:/home/app/.config/pulse:rw \
 		--device /dev/snd \
 		-p 4713:4713 \
 		--restart always \
-		--group-add audio \
+		${docker_flags} \
 		--name pulseaudio \
 		${DOCKER_REPO}/pulseaudio
 }
@@ -246,7 +261,7 @@ reg() {
 skype(){
 	del_stopped skype force
 	relies_on pulseaudio
-
+	local docker_flags+=$(match_groups "audio" "video")
 	docker run -d \
 		-v /etc/localtime:/etc/localtime:ro \
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
@@ -256,14 +271,13 @@ skype(){
 		-e PULSE_SERVER=pulseaudio \
 		--security-opt seccomp:unconfined \
 		--device /dev/video0 \
-		--group-add video \
-		--group-add audio \
+		${docker_flags} \
 		--name skype \
 		${DOCKER_REPO}/skype
 }
 spotify(){
 	del_stopped spotify
-
+	local docker_flags+=$(match_groups "audio" "video")
 	docker run -it \
 		-v /etc/localtime:/etc/localtime:ro \
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
@@ -273,8 +287,7 @@ spotify(){
 		--security-opt seccomp:unconfined \
 		--device /dev/snd \
 		--device /dev/dri \
-		--group-add audio \
-		--group-add video \
+		${docker_flags} \
 		--name spotify \
 		${DOCKER_REPO}/spotify
 }
