@@ -144,7 +144,7 @@ chrome(){
 #		--security-opt seccomp:$HOME/dotfiles/etc/docker/seccomp/chrome.json \
 	# one day remove /etc/hosts bind mount when effing
 	# overlay support inotify, such bullshit
-	docker run -d \
+	docker run -it \
 		--memory 3gb \
 		-v /etc/localtime:/etc/localtime:ro \
 		-v /etc/machine-id:/etc/machine-id:ro \
@@ -250,7 +250,6 @@ pulseaudio(){
 }
 
 reg() {
-	echo "$@"
 	del_stopped reg
 	docker run -it --rm \
 	    -v ${HOME}/.docker:/root/.docker \
