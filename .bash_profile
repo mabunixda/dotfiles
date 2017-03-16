@@ -13,7 +13,7 @@ for file in ~/.{bash_prompt,aliases,functions,path,dockerfunctions,ssh-agent,exp
 	fi
 done
 unset file
-for file in $(ls ~/.extra-*); do
+for file in $(find ~/ -maxdepth 1 -name ".extra.*"); do
 	source "$file"
 done
 unset file
