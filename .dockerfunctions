@@ -81,23 +81,7 @@ relies_on(){
 #		ansible \
 #		ansible-vault $@
 #}
-avlsocks() {
-	del_stopped avlsocks
 
-	network_state=$(docker network inspect --format "{.Scope}" socks 2>/dev/null)
-	if [[ "$network_state" == "" ]]; then
-		docker network create socks
-	fi
-
-		docker run -d  \
-			-v $HOME/.ssh/id_rsa:/home/app/.ssh/id_rsa:ro \
-			-v $HOME/.ssh/config:/home/app/.ssh/config:rw \
-			-v $HOME/.ssh/known_hosts:/home/app/.ssh/known_hosts:rw \
-			--network socks \
-			--name avlsocks \
-			avlsocksproxy 
-
-}
 betaflight() {
 
 	relies_on chrome
@@ -207,6 +191,22 @@ htop(){
 		--name htop \
 		${DOCKER_REPO}/htop
 }
+jd2() {
+
+	localport=$(grep "localhttpport" ~/.jdownloader2/cfg/*.json | awk -F': ' '{print $3}'  | sed 's/,//')
+	docker_flags=$(match_groups docker)
+	docker_flags+=" -p 127.0.0.1:$localport:$localport"
+
+	docker run -it \
+		--network socks \
+		-v /etc/localtime:/etc/localtime:ro \
+		-v /tmp/.X11-unix:/tmp/.X11-unix \
+		-v ~/.jdownloader2:/home/app \
+		-v ~/Downloads:/home/app/Downloads \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		$docker_flags \
+		-e DISPLAY=unix$DISPLAY ${DOCKER_REPO}/jdownloader2
+}
 loxconfig() {
 
 	variant="$1"
@@ -224,6 +224,16 @@ loxconfig() {
 		${DOCKER_REPO}/loxconfig-wine:$variant \
  		wine "C:\Program Files (x86)\Loxone\LoxoneConfig\LoxoneConfig.exe"
 }
+ovpn() {
+	docker run --rm -it  \
+		--network host \
+		--cap-add NET_ADMIN \
+		--device /dev/net/tun \
+		-v ${PWD}:/etc/openvpn \
+		${DOCKER_REPO}/openvpn \
+		$1
+
+}
 postman() {
 
 	relies_on chrome
@@ -236,6 +246,11 @@ postman() {
 
 }
 pulseaudio(){
+	network_state=$(docker network inspect --format "{.Scope}" pulseaudio 2>/dev/null)
+	if [[ "$network_state" == "" ]]; then
+		docker network create pulseaudio
+	fi
+
 	del_stopped pulseaudio
 	local docker_flags+=$(match_groups "audio")
 	docker run -d \
@@ -243,6 +258,7 @@ pulseaudio(){
 		-v $HOME/.config/pulse:/home/app/.config/pulse:rw \
 		--device /dev/snd \
 		-p 4713:4713 \
+		--network pulseaudio \
 		--restart always \
 		${docker_flags} \
 		--name pulseaudio \
@@ -250,10 +266,8 @@ pulseaudio(){
 }
 
 reg() {
-	del_stopped reg
 	docker run -it --rm \
 	    -v ${HOME}/.docker:/root/.docker \
-		--name reg \
 		r.j3ss.co/reg \
 		"$@"
 }
@@ -264,15 +278,39 @@ skype(){
 	docker run -d \
 		-v /etc/localtime:/etc/localtime:ro \
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
-                -v $HOME/.Skype:/home/app/.Skype \
+        -v $HOME/.Skype:/home/app/.Skype \
 		-e "DISPLAY=unix${DISPLAY}" \
-		--link pulseaudio:pulseaudio \
+		--network pulseaudio \
 		-e PULSE_SERVER=pulseaudio \
 		--security-opt seccomp:unconfined \
+		--device /dev/snd \
 		--device /dev/video0 \
 		${docker_flags} \
 		--name skype \
 		${DOCKER_REPO}/skype
+}
+socksproxy() {
+
+	local tmp="$1"
+	network_state=$(docker network inspect --format "{.Scope}" socks 2>/dev/null)
+	if [[ "$network_state" == "" ]]; then
+		docker network create socks
+	fi
+	local docker_flags=
+	if [ ! -z "$2" ]; then	
+		docker_flags+="--name $2"
+		del_stopped "$2"
+	fi
+	
+	docker run -d  --rm \
+			-v $HOME/.ssh/id_rsa:/home/app/.ssh/id_rsa:ro \
+			-v $HOME/.ssh/config:/home/app/.ssh/config:rw \
+			-v $HOME/.ssh/known_hosts:/home/app/.ssh/known_hosts:rw \
+			--network socks \
+			$docker_flags \
+			${DOCKER_REPO}/socksproxy  \
+			"$1"
+
 }
 spotify(){
 	del_stopped spotify
@@ -283,6 +321,8 @@ spotify(){
 		-v "${HOME}/.config/spotify:/home/app/.config/spotify" \
 		-e "DISPLAY=unix${DISPLAY}" \
 		-e QT_DEVICE_PIXEL_RATIO \
+		--network pulseaudio \
+		-e PULSE_SERVER=pulseaudio \
 		--security-opt seccomp:unconfined \
 		--device /dev/snd \
 		--device /dev/dri \
@@ -328,7 +368,16 @@ wine() {
 		${DOCKER_REPO}/wine \
  		bash
 }
-
+wireshark() {
+	del_stopped wireshark
+	docker run -it \
+		-v /etc/localtime:/etc/localtime:ro \
+		-v /tmp/.X11-unix:/tmp/.X11-unix \
+		-e DISPLAY=unix$DISPLAY \
+		--name wireshark \
+		${DOCKER_REPO}/wireshark \
+		"$@"
+}
 ###
 ### Awesome sauce by @jpetazzo
 ###

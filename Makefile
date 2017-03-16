@@ -13,9 +13,9 @@ bin:
 	fi; \
 	if [ ! -f "/usr/local/bin/cfssljson" ]; then \
 		sudo curl -s -L -o /usr/local/bin/cfssljson https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64; \
-	fi
-	sudo chmod +x /usr/local/bin/{cfssl,cfssljson};
-	sudo ln -sf $(CURDIR)/bin/browser-exec /usr/local/bin/xdg-open; \
+	fi; \
+	sudo chmod +x /usr/local/bin/{cfssl,cfssljson}; \
+	sudo ln -sf $(CURDIR)/bin/browser-exec /usr/local/bin/xdg-open
 
 dotfiles:
 	# add aliases for dotfiles
