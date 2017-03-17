@@ -332,9 +332,9 @@ spotify(){
 }
 virt-manager() {
 	del_stopped virt-manager 
-	echo "$@"
+	
 	docker run -it \
-                -e DISPLAY=unix$DISPLAY \
+       -e DISPLAY=unix$DISPLAY \
     	-v /tmp/.X11-unix:/tmp/.X11-unix \
 		-v $SSH_AUTH_SOCK:$SSH_AUTH_SOCK \
 	    -v $HOME/.ssh:/home/app/.ssh \
@@ -343,6 +343,17 @@ virt-manager() {
     	--device /dev/dri \
 		--name virt-manager \
 		${DOCKER_REPO}/virt-manager 
+}
+vlc() {
+	local docker_flags+=$(match_groups "audio" "video")
+	docker run --rm -d \
+		--device /dev/snd \
+		--device /dev/dri \
+        -e DISPLAY=unix$DISPLAY \
+    	-v /tmp/.X11-unix:/tmp/.X11-unix \
+		-v ${HOME}:/home/app \
+		${docker_flags} \
+		${DOCKER_REPO}/vlc
 }
 vscode(){
 	del_stopped vscode 
