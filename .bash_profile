@@ -13,8 +13,10 @@ for file in ~/.{bash_prompt,aliases,functions,path,dockerfunctions,ssh-agent,exp
 	fi
 done
 unset file
-for file in $(find ~/ -maxdepth 1 -name ".extra.*"); do
-	source "$file"
+for file in $(find ${HOME} -maxdepth 1 -name ".extra.*"); do
+	if [[ -r "$file" ]] && [[ -f "$file" ]]; then
+		source "$file"
+	fi
 done
 unset file
 # Case-insensitive globbing (used in pathname expansion)
