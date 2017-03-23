@@ -2,17 +2,60 @@
 
 setgit() {
     MOD="$1"
-    if [ -z "$MOD" ]; then 
+    if [ -z "$MOD" ] || [ ! -f  "${HOME}/.gitconfig-$MOD" ]; then 
         MOD="private"
     fi
-    if [ -f  "${HOME}/.gitconfig-$MOD" ]; then
-        echo "switching git to $MOD"
-        ln -sfn "$HOME/.gitconfig-$MOD" "$HOME/.gitconfig"
-    fi
+    echo "switching git to $MOD"
+    ln -sfn "$HOME/.gitconfig-$MOD" "$HOME/.gitconfig"
 }
 
 vagrant_ssh() {
     name=$(vagrant  status | head -n 3 | tail -n 1 | awk -F' ' '{print $1}')
     vagrant ssh-config > ${HOME}/.ssh/config.d/vagrant_$name.conf
-    cat ${HOME}/.ssh/config.d/vagrant_$name.conf  >> ${HOME}/.ssh/config
+    generate_ssh_config
+}
+
+generate_ssh_config() {
+    if [ -f "${HOME}/.ssh/config" ]; then 
+		mv -f ${HOME}/.ssh/config ${HOME}/.ssh/config.bkp
+	fi
+	for file in $(find ${HOME}/.ssh/config.d/ -name "*.conf"); do 
+		cat $file >> ${HOME}/.ssh/config
+        echo "" >> ${HOME}/.ssh/config
+	done
+}
+
+
+init_vagrant() {
+
+    name=$(basename `pwd`)
+    boxname="$1"
+    mem="$2"
+    if [ -z "$boxname" ]; then  
+        boxname="ubuntu/xenial64"
+    fi
+    if [ -z "$mem" ]; then  
+        mem="512"
+    fi
+    cat << __EOF__ >  Vagrantfile
+
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "$boxname"
+  config.vm.hostname = "$name"
+  config.vm.define "$name" do |vb|
+  end
+
+  config.ssh.insert_key = true
+  config.ssh.forward_agent = true
+
+  config.vm.provider :virtualbox do |vb|
+      vb.name = "$name" 
+      vb.customize ["modifyvm", :id, "--memory", "$mem"]      
+    end
+
+end
+__EOF__
+
+
 }
