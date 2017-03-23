@@ -10,3 +10,9 @@ setgit() {
         ln -sfn "$HOME/.gitconfig-$MOD" "$HOME/.gitconfig"
     fi
 }
+
+vagrant_ssh() {
+    name=$(vagrant  status | head -n 3 | tail -n 1 | awk -F' ' '{print $1}')
+    vagrant ssh-config > ${HOME}/.ssh/config.d/vagrant_$name.conf
+    cat ${HOME}/.ssh/config.d/vagrant_$name.conf  >> ${HOME}/.ssh/config
+}
