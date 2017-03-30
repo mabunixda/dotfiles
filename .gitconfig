@@ -150,6 +150,7 @@
 [merge]
 	# Include summaries of merged commits in newly created merge commit messages
 	log = true
+	tool = meld
 
 [push]
 	# change to maching for machines with older versions of git 1.x.x
@@ -195,3 +196,5 @@
 	email = mabunixda@gmail.com
 	name = Martin Buchleitner
 	signingkey = 0xA8ABD9661A093431
+[mergetool "meld"]
+	path = /usr/bin/meld
