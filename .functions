@@ -29,18 +29,23 @@ generate_ssh_config() {
 init_vagrant() {
 
     name=$(basename `pwd`)
-    boxname="$1"
-    mem="$2"
+    sshport="$1"
+    boxname="$2"
+    mem="$3"
     if [ -z "$boxname" ]; then  
         boxname="ubuntu/xenial64"
     fi
     if [ -z "$mem" ]; then  
         mem="512"
     fi
+
+
+
     cat << __EOF__ >  Vagrantfile
 
 Vagrant.configure("2") do |config|
 
+  config.vm.network "forwarded_port", guest: 22, host: $sshport, id: "ssh"
   config.vm.box = "$boxname"
   config.vm.hostname = "$name"
   config.vm.define "$name" do |vb|

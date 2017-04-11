@@ -17,7 +17,7 @@ dcleanup(){
 	docker rmi "${images[@]}" 2>/dev/null
 }
 
-match_groups() { 
+match_groups() {
 	local wanted_groups=$@
 	local docker_flags=
 	for group in ${wanted_groups}; do
@@ -31,7 +31,7 @@ optional_devices() {
 	local wanted_devices=$@
 	local docker_flags=
 	for dev in ${wanted_devices}; do
-		[ -f "$dev" ] && docker_flags+=" --device $dev" 
+		[ -f "$dev" ] && docker_flags+=" --device $dev"
 	done
 	echo $docker_flags
 }
@@ -43,7 +43,7 @@ del_stopped(){
 	state=$(docker inspect --format "{{.State.Running}}" "$name" 2>/dev/null)
 	if [[ "$state" == "false" ]]; then
 		docker rm "$name"
-	else 
+	else
 		if [[ "$force" == "force" ]]; then
 			docker rm -f "$name"
 		fi
@@ -114,7 +114,7 @@ citrix() {
 		--user-data-dir=/data \
 		--profile-directory=Default \
 		--app-id=kdaghagfopacdngbohiknlhcocjccjao
-		
+
 }
 chrome(){
 	# add flags for proxy if passed
@@ -138,7 +138,7 @@ chrome(){
 #		--security-opt seccomp:$HOME/dotfiles/etc/docker/seccomp/chrome.json \
 	# one day remove /etc/hosts bind mount when effing
 	# overlay support inotify, such bullshit
-	docker run -it \
+	docker run -d \
 		--memory 3gb \
 		-v /etc/localtime:/etc/localtime:ro \
 		-v /etc/machine-id:/etc/machine-id:ro \
@@ -162,6 +162,16 @@ chrome(){
 		--host-resolver-rules="$map" "$args"
 
 }
+
+dgcloud(){
+	docker run --rm -it \
+		-v "${HOME}/.gcloud:/root/.config/gcloud" \
+		-v "${HOME}/.ssh:/root/.ssh:ro" \
+		-v "$(which docker):/usr/bin/docker" \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		--name gcloud \
+		${DOCKER_REPO}/gcloud "$@"
+}
 firefox(){
 	del_stopped firefox
 	docker run  \
@@ -183,15 +193,31 @@ firefox(){
 		--name firefox \
 		${DOCKER_REPO}/firefox "$@"
 }
-dgcloud(){
-	docker run --rm -it \
-		-v "${HOME}/.gcloud:/root/.config/gcloud" \
-		-v "${HOME}/.ssh:/root/.ssh:ro" \
-		-v "$(which docker):/usr/bin/docker" \
-		-v /var/run/docker.sock:/var/run/docker.sock \
-		--name gcloud \
-		${DOCKER_REPO}/gcloud "$@"
+gatling() {
+	del_stopped gatling
+	docker run \
+		--name gatling \
+		--net host \
+		-v /etc/localtime:/etc/localtime:ro \
+		-v "$HOME/.gatling/conf/:/opt/gatling/conf" \
+		-v "${HOME}/.gatling/results:/opt/gatling/results" \
+		-v "${HOME}/.gatling/user-files:/opt/gatling/user-files" \
+		${DOCKER_REPO}/gatling "gatling.sh" "$@"
 }
+
+gatling_record() {
+	docker run --rm -it  \
+		--net host \
+		-v /etc/localtime:/etc/localtime:ro \
+		-v /tmp/.X11-unix:/tmp/.X11-unix \
+		-e "DISPLAY=unix${DISPLAY}" \
+		-v "$HOME/.gatling/conf/:/opt/gatling/conf" \
+		-v "${HOME}/.gatling/results:/opt/gatling/results" \
+		-v "${HOME}/.gatling/user-files:/opt/gatling/user-files" \
+		${DOCKER_REPO}/gatling "recorder.sh" "$@"
+
+}
+
 gitkraken(){
 	del_stopped gitkraken
 
@@ -218,6 +244,7 @@ jd2() {
 	docker_flags+=" -p 127.0.0.1:$localport:$localport"
 
 	docker run -it \
+		--privileged \
 		--network socks \
 		-v /etc/localtime:/etc/localtime:ro \
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
@@ -243,6 +270,19 @@ loxconfig() {
 		--name loxconfig-wine-8.1 \
 		${DOCKER_REPO}/loxconfig-wine:$variant \
  		wine64 "C:\Program Files (x86)\Loxone\LoxoneConfig\LoxoneConfig.exe"
+}
+netbeans(){
+	del_stopped netbeans
+	docker run -d \
+		-v /etc/localtime:/etc/localtime:ro \
+		-v /tmp/.X11-unix:/tmp/.X11-unix \
+		-v "${HOME}/:/home/app/" \
+		-e "DISPLAY=unix${DISPLAY}" \
+		--security-opt seccomp:unconfined \
+		--device /dev/snd \
+		--device /dev/dri \
+		--name netbeans \
+		${DOCKER_REPO}/netbeans
 }
 ovpn() {
 	docker run --rm -it  \
@@ -295,6 +335,7 @@ skype(){
 	del_stopped skype force
 	relies_on pulseaudio
 	local docker_flags+=$(match_groups "audio" "video")
+
 	docker run -d \
 		-v /etc/localtime:/etc/localtime:ro \
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
@@ -317,11 +358,11 @@ socksproxy() {
 		docker network create socks
 	fi
 	local docker_flags=
-	if [ ! -z "$2" ]; then	
+	if [ ! -z "$2" ]; then
 		docker_flags+="--name $2"
 		del_stopped "$2"
 	fi
-	
+
 	docker run -d  --rm \
 			-v $HOME/.ssh/id_rsa:/home/app/.ssh/id_rsa:ro \
 			-v $HOME/.ssh/config:/home/app/.ssh/config:rw \
@@ -351,8 +392,8 @@ spotify(){
 		${DOCKER_REPO}/spotify
 }
 virt-manager() {
-	del_stopped virt-manager 
-	
+	del_stopped virt-manager
+
 	docker run -it \
        -e DISPLAY=unix$DISPLAY \
     	-v /tmp/.X11-unix:/tmp/.X11-unix \
@@ -362,7 +403,7 @@ virt-manager() {
 		-e SSH_AUTH_SOCK=$SSH_AUTH_SOCK \
     	--device /dev/dri \
 		--name virt-manager \
-		${DOCKER_REPO}/virt-manager 
+		${DOCKER_REPO}/virt-manager
 }
 vlc() {
 	local docker_flags+=$(match_groups "audio" "video")
@@ -376,7 +417,7 @@ vlc() {
 		${DOCKER_REPO}/vlc
 }
 vscode(){
-	del_stopped vscode 
+	del_stopped vscode
 
 	docker run -d \
 	    -e DISPLAY=unix$DISPLAY \
@@ -409,6 +450,20 @@ wireshark() {
 		${DOCKER_REPO}/wireshark \
 		"$@"
 }
+
+xdocker() {
+		dockerimage="$1"
+		shift
+		echo "try to run $dockerimage with x "
+		docker run --rm -it \
+		-v /etc/localtime:/etc/localtime:ro \
+		-v /tmp/.X11-unix:/tmp/.X11-unix  \
+		-e DISPLAY=unix$DISPLAY \
+		"$dockerimage" \
+		"$@"
+
+}
+
 ###
 ### Awesome sauce by @jpetazzo
 ###
