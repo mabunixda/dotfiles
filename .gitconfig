@@ -198,3 +198,10 @@
 	signingkey = 0xA8ABD9661A093431
 [mergetool "meld"]
 	path = /usr/bin/meld
+
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+

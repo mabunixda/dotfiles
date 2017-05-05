@@ -143,6 +143,7 @@ chrome(){
 		-v /etc/localtime:/etc/localtime:ro \
 		-v /etc/machine-id:/etc/machine-id:ro \
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
+		-v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket \
 		-e "DISPLAY=unix${DISPLAY}" \
 		-v "$HOME/Downloads:/home/app/Downloads" \
 		-v "$HOME/.config/google-chrome/:/data" \
@@ -391,6 +392,18 @@ spotify(){
 		--name spotify \
 		${DOCKER_REPO}/spotify
 }
+sqldeveloper() {
+
+		echo "try to run $dockerimage with x "
+		docker run --rm -it \
+		--privileged \
+		--network host \
+		-v /etc/localtime:/etc/localtime:ro \
+		-v /tmp/.X11-unix:/tmp/.X11-unix  \
+		-e DISPLAY=unix$DISPLAY \
+		"r.nitram.at/sqldeveloper" \
+		"$@"
+}
 virt-manager() {
 	del_stopped virt-manager
 
@@ -405,7 +418,7 @@ virt-manager() {
 		--name virt-manager \
 		${DOCKER_REPO}/virt-manager
 }
-vlc() {
+dvlc() {
 	local docker_flags+=$(match_groups "audio" "video")
 	docker run --rm -d \
 		--device /dev/snd \
@@ -461,7 +474,6 @@ xdocker() {
 		-e DISPLAY=unix$DISPLAY \
 		"$dockerimage" \
 		"$@"
-
 }
 
 ###
