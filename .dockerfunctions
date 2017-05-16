@@ -470,6 +470,7 @@ xdocker() {
 		echo "try to run $dockerimage with x "
 		docker run --rm -it \
 		-v /etc/localtime:/etc/localtime:ro \
+		-v /home:/home \
 		-v /tmp/.X11-unix:/tmp/.X11-unix  \
 		-e DISPLAY=unix$DISPLAY \
 		"$dockerimage" \
