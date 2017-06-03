@@ -96,6 +96,11 @@ URxvt.font:xft:Inconsolata:pixelsize=14,style=Medium, xft:Symbola:pixelsize=13,s
 URxvt.boldFont:xft:Inconsolata:style=Bold,pixelsize=14, xft:Symbola:pixelsize=13,style=Regular
 
 URxvt.lineSpace: 1
+## teh transparency stuff
+URxvt*inheritPixmap: true
+URxvt*tintColor: white
+URxvt*shading: 100
+
 
 *faceSize:              10
 *bellIsUrgent:          true

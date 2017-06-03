@@ -139,7 +139,7 @@ chrome(){
 	# one day remove /etc/hosts bind mount when effing
 	# overlay support inotify, such bullshit
 	docker run -d \
-		--memory 3gb \
+		--memory 6gb \
 		-v /etc/localtime:/etc/localtime:ro \
 		-v /etc/machine-id:/etc/machine-id:ro \
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
@@ -364,7 +364,7 @@ socksproxy() {
 		del_stopped "$2"
 	fi
 
-	docker run -d  --rm \
+	docker run -d --rm \
 			-v $HOME/.ssh/id_rsa:/home/app/.ssh/id_rsa:ro \
 			-v $HOME/.ssh/config:/home/app/.ssh/config:rw \
 			-v $HOME/.ssh/known_hosts:/home/app/.ssh/known_hosts:rw \

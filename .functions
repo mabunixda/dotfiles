@@ -1,8 +1,12 @@
 #!/bin/bash
 
+beautify_ansible() {
+    export ANSIBLE_STDOUT_CALLBACK=debug
+}
+
 setgit() {
     MOD="$1"
-    if [ -z "$MOD" ] || [ ! -f  "${HOME}/.gitconfig-$MOD" ]; then 
+    if [ -z "$MOD" ] || [ ! -f  "${HOME}/.gitconfig-$MOD" ]; then
         MOD="private"
     fi
     echo "switching git to $MOD"
@@ -16,10 +20,10 @@ vagrant_ssh() {
 }
 
 generate_ssh_config() {
-    if [ -f "${HOME}/.ssh/config" ]; then 
+    if [ -f "${HOME}/.ssh/config" ]; then
 		mv -f ${HOME}/.ssh/config ${HOME}/.ssh/config.bkp
 	fi
-	for file in $(find ${HOME}/.ssh/config.d/ -name "*.conf"); do 
+	for file in $(find ${HOME}/.ssh/config.d/ -name "*.conf"); do
 		cat $file >> ${HOME}/.ssh/config
         echo "" >> ${HOME}/.ssh/config
 	done
@@ -32,10 +36,10 @@ init_vagrant() {
     sshport="$1"
     boxname="$2"
     mem="$3"
-    if [ -z "$boxname" ]; then  
+    if [ -z "$boxname" ]; then
         boxname="ubuntu/xenial64"
     fi
-    if [ -z "$mem" ]; then  
+    if [ -z "$mem" ]; then
         mem="512"
     fi
 
@@ -55,8 +59,8 @@ Vagrant.configure("2") do |config|
   config.ssh.forward_agent = true
 
   config.vm.provider :virtualbox do |vb|
-      vb.name = "$name" 
-      vb.customize ["modifyvm", :id, "--memory", "$mem"]      
+      vb.name = "$name"
+      vb.customize ["modifyvm", :id, "--memory", "$mem"]
     end
 
 end
