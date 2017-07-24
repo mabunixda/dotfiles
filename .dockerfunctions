@@ -5,6 +5,13 @@
 
 DOCKER_REPO="r.nitram.at"
 
+drestart() {
+
+	local name="$1"
+	docker stop $name
+	del_stopped $name
+	$name
+}
 dcleanup(){
 	local containers
 	containers=( $(docker ps -aq 2>/dev/null) )
@@ -15,6 +22,11 @@ dcleanup(){
 	local images
 	images=( $(docker images --filter dangling=true -q 2>/dev/null) )
 	docker rmi "${images[@]}" 2>/dev/null
+
+	local forced="$1"
+	if [ "$forced" == "yes" ]; then
+		docker rmi -f $(docker images -aq)
+	fi
 }
 
 match_groups() {
@@ -139,7 +151,6 @@ chrome(){
 	# one day remove /etc/hosts bind mount when effing
 	# overlay support inotify, such bullshit
 	docker run -d \
-		--memory 6gb \
 		-v /etc/localtime:/etc/localtime:ro \
 		-v /etc/machine-id:/etc/machine-id:ro \
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
@@ -261,7 +272,10 @@ loxconfig() {
 	if [ -z "$variant" ]; then
 		variant="beta"
 	fi
-
+	image="$2"
+	if [ -z "$image" ]; then
+		image="${DOCKER_REPO}/loxconfig-wine"
+	fi
 	docker run --rm -it \
 		-v /etc/localtime:/etc/localtime:ro \
 		--cpuset-cpus 0 \
@@ -269,8 +283,9 @@ loxconfig() {
 		-e DISPLAY=unix$DISPLAY \
 		--device /dev/snd:/dev/snd \
 		--name loxconfig-wine-8.1 \
-		${DOCKER_REPO}/loxconfig-wine:$variant \
- 		wine64 "C:\Program Files (x86)\Loxone\LoxoneConfig\LoxoneConfig.exe"
+		$image:$variant \
+ 		/bin/bash
+	#wine64 "C:\Program Files (x86)\Loxone\LoxoneConfig\LoxoneConfig.exe"
 }
 netbeans(){
 	del_stopped netbeans
