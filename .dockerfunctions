@@ -380,7 +380,7 @@ socksproxy() {
 	fi
 
 	docker run -d --rm \
-			-v $HOME/.ssh/id_rsa:/home/app/.ssh/id_rsa:ro \
+			-v $HOME/.ssh/avl_rsa:/home/app/.ssh/avl_rsa:ro \
 			-v $HOME/.ssh/config:/home/app/.ssh/config:rw \
 			-v $HOME/.ssh/known_hosts:/home/app/.ssh/known_hosts:rw \
 			--network socks \
