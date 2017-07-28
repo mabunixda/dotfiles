@@ -29,7 +29,9 @@ generate_ssh_config() {
 	done
 }
 
-
+gitstatus() {
+	find $PWD/* -type d -name ".git" -not -name "*build*"  -exec /bin/bash -c '(echo `dirname "{}"` && cd `dirname "{}"` && git status -s && echo "" ) ' \;
+}
 init_vagrant() {
 
     name=$(basename `pwd`)
