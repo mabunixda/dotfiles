@@ -419,6 +419,19 @@ sqldeveloper() {
 		"r.nitram.at/sqldeveloper" \
 		"$@"
 }
+torproxy(){
+	del_stopped torproxy
+
+	docker run -d \
+		--restart always \
+		-v /etc/localtime:/etc/localtime:ro \
+		-p 9050:9050 \
+		--network socks \
+		--name torproxy \
+		${DOCKER_REPO}/tor-proxy
+
+	hostess add torproxy "$(docker inspect --format '{{.NetworkSettings.Networks.bridge.IPAddress}}' torproxy)"
+}
 virt-manager() {
 	del_stopped virt-manager
 
@@ -485,7 +498,6 @@ xdocker() {
 		echo "try to run $dockerimage with x "
 		docker run --rm -it \
 		-v /etc/localtime:/etc/localtime:ro \
-		-v /home:/home \
 		-v /tmp/.X11-unix:/tmp/.X11-unix  \
 		-e DISPLAY=unix$DISPLAY \
 		"$dockerimage" \
