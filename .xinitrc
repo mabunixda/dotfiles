@@ -11,10 +11,6 @@ if [ -f $sysresources ]; then
 
 
 
-
-
-
-
     xrdb -merge $sysresources
 
 fi
@@ -47,7 +43,6 @@ if [ -d /etc/X11/xinit/xinitrc.d ] ; then
  done
  unset f
 fi
-
-# exec fluxbox
-# exec lxdm
-exec gnome-session
+exec xrdb -merge $HOME/.Xresources
+exec xhost +local:
+exec startxfce4
