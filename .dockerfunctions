@@ -185,26 +185,18 @@ dgcloud(){
 		--name gcloud \
 		${DOCKER_REPO}/gcloud "$@"
 }
-firefox(){
-	del_stopped firefox
-	docker run  \
-		--memory 2gb \
-		--net host \
-		--cpuset-cpus 0 \
+eclipse(){
+	del_stopped eclipse
+	docker run -d \
 		-v /etc/localtime:/etc/localtime:ro \
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
-		-v "${HOME}/.firefox/cache:/root/.cache/mozilla" \
-		-v "${HOME}/.firefox/mozilla:/root/.mozilla" \
-		-v "${HOME}/Downloads:/root/Downloads" \
-		-v "${HOME}/Pictures:/root/Pictures" \
-		-v "${HOME}/Torrents:/root/Torrents" \
+		-v "${HOME}/:/home/app/" \
 		-e "DISPLAY=unix${DISPLAY}" \
-		-e GDK_SCALE \
-		-e GDK_DPI_SCALE \
+		--security-opt seccomp:unconfined \
 		--device /dev/snd \
 		--device /dev/dri \
-		--name firefox \
-		${DOCKER_REPO}/firefox "$@"
+		--name eclipse \
+		${DOCKER_REPO}/eclipse
 }
 gatling() {
 	del_stopped gatling
@@ -308,7 +300,7 @@ ovpn() {
 		--device /dev/net/tun \
 		-v ${PWD}:/etc/openvpn \
 		${DOCKER_REPO}/openvpn \
-		$1
+		$@
 
 }
 postman() {
