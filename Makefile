@@ -27,7 +27,7 @@ dotfiles:
 	done; \
 	ln -sfn $(CURDIR)/.gnupg/gpg.conf $(HOME)/.gnupg/gpg.conf; \
 	ln -sfn $(CURDIR)/.gitconfig $(HOME)/.gitconfig-private;
-#	ln -sfn $(CURDIR)/.gnupg/gpg-agent.conf $(HOME)/.gnupg/gpg-agent.conf;
+	ln -sfn $(CURDIR)/.gnupg/gpg-agent.conf $(HOME)/.gnupg/gpg-agent.conf;
 #	ln -fn $(CURDIR)/gitignore $(HOME)/.gitignore;
 
 
