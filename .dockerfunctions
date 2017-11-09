@@ -359,6 +359,18 @@ skype(){
 		--name skype \
 		${DOCKER_REPO}/skype
 }
+smartgit(){
+	del_stopped smartgit
+
+	docker run -it \
+    -e DISPLAY=unix$DISPLAY \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -v $HOME:/home/app \
+    --device /dev/dri \
+    --name smartgit \
+    ${DOCKER_REPO}/smartgit
+}
+
 socksproxy() {
 
 	local tmp="$1"
