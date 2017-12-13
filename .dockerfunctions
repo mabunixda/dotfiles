@@ -397,6 +397,8 @@ socksproxy() {
 spotify(){
 	del_stopped spotify
 	local docker_flags+=$(match_groups "audio" "video")
+	relies_on pulseaudio
+
 	docker run -d \
 		-v /etc/localtime:/etc/localtime:ro \
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
