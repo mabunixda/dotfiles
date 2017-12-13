@@ -201,9 +201,9 @@ bar {
 exec --no-startup-id feh --bg-fill ${HOME}/Pictures/uuXY5N8.jpg
 
 # keymaps
-exec setxkbmap -layout us,de
-exec setxkbmap -option 'grp:alt_shift_toggle'
 # run the merge for good colors
 exec xrdb -merge $HOME/.Xresources
 exec xrdb -merge $HOME/.Xdefaults
+exec setxkbmap -layout us,de
+exec setxkbmap -option 'grp:alt_shift_toggle'
 
