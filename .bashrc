@@ -91,10 +91,10 @@ if ! shopt -oq posix; then
 		. /etc/bash_completion
 	fi
 fi
-#for file in /etc/bash_completion.d/* ; do
-#	# shellcheck source=/dev/null
-#	source "$file"
-#done
+for file in /etc/bash_completion.d/* ; do
+	# shellcheck source=/dev/null
+	source "$file"
+done
 
 if [[ -f "${HOME}/.bash_profile" ]]; then
 	# shellcheck source=/dev/null
@@ -115,13 +115,8 @@ unset SSH_AGENT_PID
 if [ "${gnupg_SSH_AUTH_SOCK_by:-0}" -ne $$ ]; then
 	export SSH_AUTH_SOCK="/run/user/$UID/gnupg/S.gpg-agent.ssh"
 fi
-if [ -z "$$SH_AGENT_PID" ]; then
-	eval `ssh-agent -s`
-fi
-if [ $SSH_AGENT_PID ]; then
-    if [[ $(ssh-add -l) != *id_?sa* ]]; then
-        ssh-add -t 2h  ## Haltbarkeit von 2 Std.
-    fi
-fi
 # add alias for ssh to update the tty
-# alias ssh="gpg-connect-agent updatestartuptty /bye >/dev/null; ssh"
+alias ssh="gpg-connect-agent updatestartuptty /bye >/dev/null; ssh"
+
+source <(kompose completion bash)
+
