@@ -372,17 +372,21 @@ smartgit(){
 }
 
 socksproxy() {
-
-	local tmp="$1"
+        local cmd=""
+	local name="$1"
+	local docker_flags=
 	network_state=$(docker network inspect --format "{.Scope}" socks 2>/dev/null)
 	if [[ "$network_state" == "" ]]; then
 		docker network create socks
 	fi
-	local docker_flags=
 	if [ ! -z "$2" ]; then
+	    	cmd="$1"
+		name="$2"
 		docker_flags+="--name $2"
-		del_stopped "$2"
+	else
+		cmd="ssh -N -D :1080 $name"
 	fi
+	del_stopped "$name"
 
 	docker run -d --rm \
 			-v $HOME/.ssh/avl_rsa:/home/app/.ssh/avl_rsa:ro \
@@ -391,7 +395,7 @@ socksproxy() {
 			--network socks \
 			$docker_flags \
 			${DOCKER_REPO}/socksproxy  \
-			"$1"
+			"$cmd"
 
 }
 spotify(){
