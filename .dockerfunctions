@@ -382,11 +382,11 @@ socksproxy() {
 	if [ ! -z "$2" ]; then
 	    	cmd="$1"
 		name="$2"
-		docker_flags+="--name $2"
 	else
 		cmd="ssh -N -D :1080 $name"
 	fi
 	del_stopped "$name"
+	docker_flags+="--name $name"
 
 	docker run -d --rm \
 			-v $HOME/.ssh/avl_rsa:/home/app/.ssh/avl_rsa:ro \
