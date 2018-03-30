@@ -31,4 +31,4 @@ fi
 xhost +local:
 
 
-exec i3
+exec startxfce4 
