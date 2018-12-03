@@ -5,6 +5,18 @@
 
 DOCKER_REPO="mabunixda"
 
+findport() {
+	local port="$1"
+	for ((i=0; i<10; ++i)); do
+		port_exists=$(docker ps | grep "${port}->${port}")
+		if [ -z "$port_exists" ]; then
+			echo $port
+			break;
+		fi
+		port=$(($port + 1))
+	done
+	echo ""
+}
 drestart() {
 
 	local name="$1"
@@ -373,7 +385,7 @@ smartgit(){
 }
 
 socksproxy() {
-        local cmd=""
+    local cmd=""
 	local name="$1"
 	local docker_flags=
 	network_state=$(docker network inspect --format "{.Scope}" socks 2>/dev/null)
@@ -381,11 +393,13 @@ socksproxy() {
 		docker network create socks
 	fi
 	if [ ! -z "$2" ]; then
-	    	cmd="$1"
+	    cmd="$1"
 		name="$2"
 	else
-		cmd="ssh -N -D :1080 $name"
-	        docker_flags+="-p 1080:1080 "
+	    port=$(findport 1080)
+		cmd="ssh -N -D :$port $name"
+	    docker_flags+="-p $port:$port "
+		echo "using proxy port $port"
 	fi
 	del_stopped "$name"
 	docker_flags+="--name $name"

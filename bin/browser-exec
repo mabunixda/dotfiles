@@ -33,6 +33,7 @@ browser_exec(){
 				# nsenter the chrome runc container
 				sudo nsenter -t "$chrome_pid" --pid --user --net --uts --mount --ipc /usr/bin/google-chrome --user-data-dir=/data "$@" 2>/dev/null
 			else
+				/usr/bin/google-chrome-stable "$@" 2 > /dev/null
 				# neither are currently running so lets try xdg-open
 #				xdg-open "$@"
 			fi

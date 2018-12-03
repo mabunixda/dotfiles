@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 userresources=$HOME/.Xresources
 usermodmap=$HOME/.Xmodmap
 sysresources=/etc/X11/xinit/.Xresources
@@ -31,4 +31,6 @@ fi
 xhost +local:
 
 
-exec startxfce4 
+# exec startxfce4 
+exec i3
+# exec enlightenment_start
