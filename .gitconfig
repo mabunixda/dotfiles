@@ -179,9 +179,6 @@
 
 	insteadOf = "gist:"
 
-	
-[github]
-	user = mabunixda
 
 [commit]
 	# gpgsign = true
@@ -195,12 +192,6 @@
 
 [credential]
 	helper = store --file ~/.git-credentials
-[user]
-	email = mabunixda@gmail.com
-	name = Martin Buchleitner
-	signingkey = 0xA8ABD9661A093431
-[mergetool "meld"]
-	path = /usr/bin/meld
 
 [filter "lfs"]
 	clean = git-lfs clean -- %f
@@ -208,9 +199,3 @@
 	process = git-lfs filter-process
 	required = true
 
-[difftool "sourcetree"]
-	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-	path =
-[mergetool "sourcetree"]
-	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
-	trustExitCode = true
