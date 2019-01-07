@@ -63,8 +63,10 @@ prompt_git() {
 }
 
 cloud=""
-if grep -q "^flags.* hypervisor" /proc/cpuinfo ; then
-	cloud="☁️ "
+if [[ "$OSTYPE" != "darwin"* ]]; then
+	if grep -q "^flags.* hypervisor" /proc/cpuinfo ; then
+		cloud="☁️ "
+	fi
 fi
 
 if tput setaf 1 &> /dev/null; then
