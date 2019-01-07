@@ -6,11 +6,19 @@ beautify_ansible() {
 
 setgit() {
     MOD="$1"
-    if [ -z "$MOD" ] || [ ! -f  "${HOME}/.gitconfig-$MOD" ]; then
+    shift
+    if [ -z "$MOD" ]; then
         MOD="private"
     fi
-    echo "switching git to $MOD"
-    ln -sfn "$HOME/.gitconfig-$MOD" "$HOME/.gitconfig"
+    if [ ! -f  "${HOME}/.gitconfig.$MOD" ]; then 
+        echo "customisation $MOD does not exit!"
+        return
+    fi
+    echo -n "reinit gitconfig ..."
+    cat "$HOME/.gitconfig.core" > "$HOME/.gitconfig"
+    echo -n " and adding $MOD ... "
+    cat "$HOME/.gitconfig.$MOD" >> "$HOME/.gitconfig"
+    echo "done"
 }
 
 vagrant_ssh() {
