@@ -9,6 +9,7 @@ case $- in
 	*) return;;
 esac
 
+BASH_COMPLETION=("/etc/bash_completion.d/" "/usr/local/etc/bash_completion.d/")
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
 shopt -s checkwinsize
@@ -91,9 +92,14 @@ if ! shopt -oq posix; then
 		. /etc/bash_completion
 	fi
 fi
-for file in /etc/bash_completion.d/* ; do
+
+for d in $BASH_COMPLETION; do
+if [ -d "$d" ]; then
+for file in "$d/*" ; do
 	# shellcheck source=/dev/null
 	source "$file"
+done
+fi
 done
 
 if [[ -f "${HOME}/.bash_profile" ]]; then
@@ -106,6 +112,8 @@ fi
 GPG_TTY=$(tty)
 export GPG_TTY
 # Start the gpg-agent if not already running
+
+if [[ "$OSTYPE" != "darwin"* ]]; then
 if ! pgrep -x -u "${USER}" gpg-agent >/dev/null 2>&1; then
 	gpg-connect-agent /bye >/dev/null 2>&1
 	gpg-connect-agent updatestartuptty /bye >/dev/null
@@ -116,7 +124,6 @@ if [ "${gnupg_SSH_AUTH_SOCK_by:-0}" -ne $$ ]; then
 	export SSH_AUTH_SOCK="/run/user/$UID/gnupg/S.gpg-agent.ssh"
 fi
 # add alias for ssh to update the tty
-# alias ssh="gpg-connect-agent updatestartuptty /bye >/dev/null; ssh"
+alias ssh="gpg-connect-agent updatestartuptty /bye >/dev/null; ssh"
 
-source <(kompose completion bash)
-
+fi
