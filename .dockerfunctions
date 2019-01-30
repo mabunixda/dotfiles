@@ -394,18 +394,24 @@ socksproxy() {
 	fi
 	if [ ! -z "$2" ]; then
 	    cmd="$1"
-		name="$2"
+	    name="$2"
 	else
 	    port=$(findport 1080)
 		cmd="ssh -N -D :$port $name"
 	    docker_flags+="-p $port:$port "
 		echo "using proxy port $port"
 	fi
+        namesize=${#name} 
+        if [[ $namesize -lt 3 ]]; then
+          name="socks_$name"
+        fi 
 	del_stopped "$name"
 	docker_flags+="--name $name"
-
-	docker run -d --rm \
-			-v $HOME/.ssh/avl_rsa:/home/app/.ssh/avl_rsa:ro \
+	for f in $( ls $HOME/.ssh/id_* ); do
+           fname=$(basename $f)
+	   docker_flags+=" -v $f:/home/app/.ssh/$fname:ro "
+	done 
+	docker run -it --rm \
 			-v $HOME/.ssh/config:/home/app/.ssh/config:rw \
 			-v $HOME/.ssh/known_hosts:/home/app/.ssh/known_hosts:rw \
 			--network socks \
