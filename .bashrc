@@ -127,3 +127,5 @@ fi
 alias ssh="gpg-connect-agent updatestartuptty /bye >/dev/null; ssh"
 
 fi
+complete -C /usr/local/bin/mc mc
+

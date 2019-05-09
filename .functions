@@ -15,6 +15,7 @@ setgit() {
         return
     fi
     echo -n "reinit gitconfig ..."
+    rm -f $HOME/.gitconfig
     cat "$HOME/.gitconfig.core" > "$HOME/.gitconfig"
     echo -n " and adding $MOD ... "
     cat "$HOME/.gitconfig.$MOD" >> "$HOME/.gitconfig"
