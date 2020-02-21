@@ -181,7 +181,7 @@
 
 
 [commit]
-	# gpgsign = true
+	gpgsign = true
 
 [http]
 	cookiefile = ~/.gitcookies

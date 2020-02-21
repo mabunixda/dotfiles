@@ -15,7 +15,7 @@ kubesec ()
          --compressed \
          --connect-timeout 5 \
          -F file=@"${FILE}" \
-        https://kubesec.io/
+        https://kubesec.io/ | jq
 }
 setgit() {
     MOD="$1"

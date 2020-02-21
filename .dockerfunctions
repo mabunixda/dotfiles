@@ -272,6 +272,14 @@ jd2() {
 		$docker_flags \
 		-e DISPLAY=unix$DISPLAY ${DOCKER_REPO}/jdownloader2
 }
+
+jekyll() {
+	docker run -it \
+		-v $PWD:/srv/jekyll \
+		-p 4000:4000 \
+		jekyll/jekyll:3.8 \
+		bash
+}
 loxconfig() {
 
 	variant="$1"
@@ -401,16 +409,16 @@ socksproxy() {
 	    docker_flags+="-p $port:$port "
 		echo "using proxy port $port"
 	fi
-        namesize=${#name} 
+        namesize=${#name}
         if [[ $namesize -lt 3 ]]; then
           name="socks_$name"
-        fi 
+        fi
 	del_stopped "$name"
 	docker_flags+="--name $name"
 	for f in $( ls $HOME/.ssh/id_* ); do
            fname=$(basename $f)
 	   docker_flags+=" -v $f:/home/app/.ssh/$fname:ro "
-	done 
+	done
 	docker run -it --rm \
 			-v $HOME/.ssh/config:/home/app/.ssh/config:rw \
 			-v $HOME/.ssh/known_hosts:/home/app/.ssh/known_hosts:rw \

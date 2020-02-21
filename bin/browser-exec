@@ -41,4 +41,9 @@ browser_exec(){
 	fi
 }
 
-browser_exec "$@"
+if [ -f "/usr/bin/open" ]; then
+  /usr/bin/open "$@"
+else
+  browser_exec "$@"
+fi
+

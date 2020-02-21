@@ -2,8 +2,9 @@
 
 # go path
 export GOPATH="${HOME}/.go"
-export GOROOT=/usr/lib/go
-
+if [[ "$OSTYPE" != "darwin"* ]]; then
+  export GOROOT=/usr/lib/go
+fi
 # update path
 export PATH=/usr/local/bin:/usr/local/go/bin:$PATH:$GOPATH/bin:/usr/share/bcc/tools:/sbin:$HOME/google-cloud-sdk/bin
 
