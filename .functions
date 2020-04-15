@@ -1,5 +1,22 @@
 #!/bin/bash
 
+function kubectlgetall {
+    if [ -z "$1" ]; then
+        echo "you must apply a namespace!"
+        exit 1
+    fi
+    for i in $(kubectl api-resources --verbs=list --namespaced -o name | grep -v "events.events.k8s.io" | grep -v "events" | sort | uniq); do
+        echo "Resource:" $i
+        kubectl -n ${1} get --ignore-not-found ${i}
+    done
+}
+function kubectl_delete_ns {
+  NAMESPACE=$1
+  kubectl proxy &
+  kubectl get namespace $NAMESPACE -o json |jq '.spec = {"finalizers":[]}' | jq '.metadata.annotations={}' | jq '.metadata.finalizers=[]' >temp.json
+  curl -k -H "Content-Type: application/json" -X PUT --data-binary @temp.json 127.0.0.1:8001/api/v1/namespaces/$NAMESPACE/finalize; 
+}
+
 beautify_ansible() {
     export ANSIBLE_STDOUT_CALLBACK=debug
 }
@@ -12,10 +29,10 @@ kubesec ()
         return 1
     };
     curl --silent \
-         --compressed \
-         --connect-timeout 5 \
-         -F file=@"${FILE}" \
-        https://kubesec.io/ | jq
+    --compressed \
+    --connect-timeout 5 \
+    -F file=@"${FILE}" \
+    https://kubesec.io/ | jq
 }
 setgit() {
     MOD="$1"
@@ -43,16 +60,16 @@ vagrant_ssh() {
 
 generate_ssh_config() {
     if [ -f "${HOME}/.ssh/config" ]; then
-		mv -f ${HOME}/.ssh/config ${HOME}/.ssh/config.bkp
-	fi
-	for file in $(find ${HOME}/.ssh/config.d/ -name "*.conf"); do
-		cat $file >> ${HOME}/.ssh/config
+        mv -f ${HOME}/.ssh/config ${HOME}/.ssh/config.bkp
+    fi
+    for file in $(find ${HOME}/.ssh/config.d/ -name "*.conf"); do
+        cat $file >> ${HOME}/.ssh/config
         echo "" >> ${HOME}/.ssh/config
-	done
+    done
 }
 
 git_status() {
-	find $PWD/* -type d -name ".git" -not -name "*build*"  -exec /bin/bash -c '(echo `dirname "{}"` && cd `dirname "{}"` && git status -s && echo "" ) ' \;
+    find $PWD/* -type d -name ".git" -not -name "*build*"  -exec /bin/bash -c '(echo `dirname "{}"` && cd `dirname "{}"` && git status -s && echo "" ) ' \;
 }
 init_vagrant() {
 
@@ -93,17 +110,17 @@ __EOF__
 
 }
 enable_de_kbd() {
-   setxkbmap -layout us,de
-   setxkbmap -option 'grp:alt_shift_toggle'
+    setxkbmap -layout us,de
+    setxkbmap -option 'grp:alt_shift_toggle'
 }
 
 git_ls_size() {
-	git rev-list --objects --all \
-| git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' \
-| awk '/^blob/ {print substr($0,6)}' \
-| sort --numeric-sort --key=2 \
-| cut --complement --characters=13-40 \
-| numfmt --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest
+    git rev-list --objects --all \
+    | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' \
+    | awk '/^blob/ {print substr($0,6)}' \
+    | sort --numeric-sort --key=2 \
+    | cut --complement --characters=13-40 \
+    | numfmt --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest
 }
 
 cpuload() {
