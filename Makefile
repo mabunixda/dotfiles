@@ -1,6 +1,6 @@
 .PHONY: all bin dotfiles etc test shellcheck
 
-all: bin dotfiles etc
+all: bin dotfiles etc zsh
 
 bin:
 	# add aliases for things in bin
@@ -39,6 +39,18 @@ etc:
 	done
 	systemctl --user daemon-reload
 	sudo systemctl daemon-reload
+
+zsh:
+	if [ ! -d ~/.oh-my-zsh/ ]; then \
+		curl -fsSL -o /tmp/ohmyzsh https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh; \
+		chmod +x /tmp/ohmyzsh; \
+		/tmp/ohmyzsh --unattended --skip-chsh; \
+		rm -f /tmp/ohmyzsh ;\
+	else \
+		cd ~/.oh-my-zsh; \
+		git pull; \
+	fi
+
 
 test: shellcheck
 

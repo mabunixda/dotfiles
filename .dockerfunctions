@@ -273,13 +273,14 @@ jd2() {
 		-e DISPLAY=unix$DISPLAY ${DOCKER_REPO}/jdownloader2
 }
 
-jekyll() {
-	docker run -it \
-		-v $PWD:/srv/jekyll \
-		-p 4000:4000 \
-		jekyll/jekyll:3.8 \
-		bash
-}
+# jekyll() {
+# 	docker run -it \
+# 		-v $PWD:/srv/jekyll \
+# 		-p 4000:4000 \
+# 		jekyll/jekyll:3.8 \
+# 		bash
+# }
+
 loxconfig() {
 
 	variant="$1"
