@@ -14,7 +14,8 @@ bin:
 	if [ ! -f "/usr/local/bin/cfssljson" ]; then \
 		sudo curl -s -L -o /usr/local/bin/cfssljson https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64; \
 	fi; \
-	sudo chmod +x /usr/local/bin/{cfssl,cfssljson}; \
+	sudo chmod +x /usr/local/bin/cfssl; \
+	sudo chmod +x /usr/local/bin/cfssljson; \
 	sudo ln -sf $(CURDIR)/bin/browser-exec /usr/local/bin/xdg-open
 
 dotfiles:
@@ -25,20 +26,25 @@ dotfiles:
 	    	ln -sfn $$file $(HOME)/$$f; \
         fi; \
 	done; \
-	ln -sfn $(CURDIR)/.gnupg/gpg.conf $(HOME)/.gnupg/gpg.conf; \
 	ln -sfn $(CURDIR)/.gitconfig $(HOME)/.gitconfig.core; \
         ln -sfn $(CURDIR)/.vim $(HOME)/.vim; \
+	mkdir -p $(HOME)/.gnupg/; \
+	ln -sfn $(CURDIR)/.gnupg/gpg.conf $(HOME)/.gnupg/gpg.conf; \
 	ln -sfn $(CURDIR)/.gnupg/gpg-agent.conf $(HOME)/.gnupg/gpg-agent.conf;
 #	ln -fn $(CURDIR)/gitignore $(HOME)/.gitignore;
 
 
 etc:
+	if [ $(shell id -u) != "0" ]; then \
 	for file in $(shell find $(CURDIR)/etc -type f -not -name ".*.swp"); do \
 		f=$$(echo $$file | sed -e 's|$(CURDIR)||'); \
 		sudo ln -f $$file $$f; \
-	done
-	systemctl --user daemon-reload
-	sudo systemctl daemon-reload
+	done; \
+	systemctl --user daemon-reload; \
+	sudo systemctl daemon-reload; \
+	fi
+
+
 
 zsh:
 	if [ ! -d ~/.oh-my-zsh/ ]; then \
