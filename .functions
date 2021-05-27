@@ -147,3 +147,13 @@ git_ls_size() {
 cpuload() {
     ps ahux --sort=-c | awk 'NR<=5{printf"%s %6d %s\n",$3,$2,$11}'
 }
+kubectl_node_pods() {
+    if [ -z "$1" ]; then
+        echo "no node appended to call"
+        return
+    fi
+    echo "Getting pods of '$1'"
+    printf '=%.0s' {1..80}
+    echo ""
+    kubectl get po -A -o wide | awk -v "node=$1" '{if ( $8==node ) { print $0 } }'
+}
