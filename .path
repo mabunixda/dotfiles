@@ -6,8 +6,7 @@ if [[ "$OSTYPE" != "darwin"* ]]; then
   export GOROOT=/usr/lib/go
 fi
 
-export PATH=$HOME/bin/:/usr/local/bin:/usr/local/go/bin:$PATH:$GOPATH/bin:/usr/share/bcc/tools:/sbin
-
+export PATH=$HOME/.local/bin/:$HOME/bin/:/usr/local/bin:/usr/local/go/bin:$PATH:$GOPATH/bin:/usr/share/bcc/tools:/sbin
 
 
 if [ -d "$HOME/google-cloud-sdk/bin" ]; then
@@ -17,6 +16,7 @@ fi
 if [ -d "$HOME/.krew" ]; then
   export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 fi
+
 # update cdpath
 export CDPATH=${CDPATH}:$GOPATH/src/github.com:$GOPATH/src/golang.org:$GOPATH/src
 
