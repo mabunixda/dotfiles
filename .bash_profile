@@ -43,3 +43,5 @@ done
 	grep -v "[?*]" | cut -d " " -f2 | \
 	tr ' ' '\n')" scp sftp ssh
 
+
+complete -C /usr/local/bin/vault vault
