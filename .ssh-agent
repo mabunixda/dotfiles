@@ -8,6 +8,11 @@ function start_agent {
     /usr/bin/ssh-agent  | sed 's/^echo/#echo/' > "${SSH_ENV}"
     chmod 600 "${SSH_ENV}"
     . "${SSH_ENV}" > /dev/null
+
+    load_ssh_keys
+}
+
+function load_ssh_keys() {
     for file in $( find ${HOME}/.ssh/  -regex ".*_*sa_.*" -or -regex ".*_ed.*_.*" | grep -v ".pub$" ); do
         /usr/bin/ssh-add $file #> /dev/null;
     done

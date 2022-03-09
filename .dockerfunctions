@@ -325,6 +325,11 @@ ovpn() {
 		$@
 
 }
+
+powershell() {
+	docker run --rm -it mcr.microsoft.com/powershell
+}
+
 postman() {
 
 	relies_on chrome

@@ -1,8 +1,8 @@
 export ZSH="$HOME/.oh-my-zsh"
 
 ZSH_THEME="robbyrussell"
-DISABLE_AUTO_UPDATE="true"
-DISABLE_UPDATE_PROMPT="true"
+# DISABLE_AUTO_UPDATE="true"
+# DISABLE_UPDATE_PROMPT="true"
 
 
 plugins=(git
@@ -15,7 +15,7 @@ plugins=(git
         bundler
         gem
         kubectl
-        macos 
+        macos
         terraform
         tmux
         ubuntu
@@ -72,3 +72,5 @@ chpwd_functions=( ${chpwd_functions} chpwd_profiles )
 	-W "$(grep "^Host" ~/.ssh/config | \
 	grep -v "[?*]" | cut -d " " -f2 | \
 	tr ' ' '\n')" scp sftp ssh
+
+autoload -U +X bashcompinit && bashcompinit

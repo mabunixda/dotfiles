@@ -50,7 +50,7 @@
 	reb = "!r() { git rebase -i HEAD~$1; }; r"
 
         # squash all commits on branch
-	sq = "!s() { git reset $(git merge-base master $(git rev-parse --abbrev-ref HEAD)) }; s"
+        sq = "!s() { git reset $(git merge-base $1 $(git rev-parse --abbrev-ref HEAD)) }; s"
 
 	# Find branches containing commit
 	fb = "!f() { git branch -a --contains $1; }; f"
