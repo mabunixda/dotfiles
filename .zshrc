@@ -15,7 +15,7 @@ plugins=(git
         bundler
         gem
         kubectl
-        osx
+        macos 
         terraform
         tmux
         ubuntu
