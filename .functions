@@ -157,3 +157,34 @@ kubectl_node_pods() {
     echo ""
     kubectl get po -A -o wide | awk -v "node=$1" '{if ( $8==node ) { print $0 } }'
 }
+github_download() {
+    org=$1
+    project=$2
+    file=$3
+    version=$(curl -sX GET https://api.github.com/repos/$org/$project/releases/latest | grep 'tag_name' | cut -d\" -f4)
+    echo "Latest version on $project github repo is $version"
+    curl -fOL "https://github.com/${org}/${project}/releases/download/${version}/${file}"
+
+}
+hashicorp_download() {
+    project=$1
+    version=$2
+    {
+        curl -o "/tmp/$project_$version.zip" -fL "https://releases.hashicorp.com/$project/$project_$version/${project}_${version}_linux_amd64.zip"
+        unzip -o "/tmp/$project_$version.zip" -d "$HOME/bin/"
+    } || {
+        rm -f "/tmp/$project_$version.zip"
+    }
+}
+
+retag_containers() {
+    target=$1
+    if [ -z "$target" ]; then
+        target="registry.home.nitram.at"
+    fi
+    for d in $(docker images | grep "^quay.io/mabunixda" | grep -v none | awk '{print $1":"$2}' | sort ); do
+        l=$(echo $d | sed "s/quay\.io\/mabunixda/$target/")
+        docker tag "$d" "$l"
+        docker push "$l"
+    done
+}

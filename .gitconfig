@@ -2,7 +2,7 @@
 
 	# View abbreviated SHA, description, and history graph of the latest 20 commits
 	l = log --pretty=oneline -n 20 --graph --abbrev-commit
- 
+
         ls = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate
 
 	# View the current working tree status using the short format
@@ -15,7 +15,7 @@
 	di = !"d() { git diff --patch-with-stat HEAD~$1; }; git diff-index --quiet HEAD -- || clear; d"
 
 	# Pull in remote changes for the current repository and all its submodules
-	p = !"git pull; git submodule foreach git pull origin master"
+	p = !"git pull; git submodule foreach git pull origin $1"
 
 	# Checkout a pull request from origin (of a github repository)
 	pr = !"pr() { git fetch origin pull/$1/head:pr-$1; git checkout pr-$1; }; pr"
@@ -50,7 +50,7 @@
 	reb = "!r() { git rebase -i HEAD~$1; }; r"
 
         # squash all commits on branch
-        sq = "!s() { git reset $(git merge-base $1 $(git rev-parse --abbrev-ref HEAD)) }; s"
+	sq = "!s() { git reset $(git merge-base $1 $(git rev-parse --abbrev-ref HEAD)) }; s"
 
 	# Find branches containing commit
 	fb = "!f() { git branch -a --contains $1; }; f"
@@ -85,7 +85,7 @@
 
 	# from seth vargo https://gist.github.com/sethvargo/6b2f7b592853381690bfe3bd00947e8f
 	unreleased = "!f() { git fetch --tags && git diff $(git tag | tail -n 1); }; f"
-	up = !git pull origin master && git remote prune origin && git submodule update --init --recursive
+	up = !git pull origin $1 && git remote prune origin && git submodule update --init --recursive
 	undo = !git reset HEAD~1 --mixed
 	top = !git log --format=format:%an | sort | uniq -c | sort -r | head -n 20
 

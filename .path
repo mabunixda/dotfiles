@@ -2,11 +2,12 @@
 
 # go path
 export GOPATH="${HOME}/.go"
-if [[ "$OSTYPE" != "darwin"* ]]; then
-  export GOROOT=/usr/lib/go
-fi
+# export GOROOT="$GOPATH"
+# if [[ "$OSTYPE" != "darwin"* ]]; then
+#  export GOROOT=/usr/lib/go
+# fi
 
-export PATH=$HOME/.local/bin/:$HOME/bin/:/usr/local/bin:/usr/local/go/bin:$PATH:$GOPATH/bin:/usr/share/bcc/tools:/sbin
+export PATH=$GOPATH/bin:$HOME/.local/bin/:$HOME/bin/:/usr/local/bin:/usr/local/go/bin:$PATH:$GOPATH/bin:/usr/share/bcc/tools:/sbin
 
 
 if [ -d "$HOME/google-cloud-sdk/bin" ]; then
@@ -19,4 +20,3 @@ fi
 
 # update cdpath
 export CDPATH=${CDPATH}:$GOPATH/src/github.com:$GOPATH/src/golang.org:$GOPATH/src
-
