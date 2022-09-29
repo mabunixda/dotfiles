@@ -1,3 +1,3 @@
-#!/usr/bin/env
+#!/usr/bin/env sh
 
 make all
