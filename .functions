@@ -33,9 +33,26 @@ function kubectlgetall {
 }
 function kubectl_delete_ns {
     NAMESPACE=$1
+    if [ -z "$NAMESPACE" ] || [ -z "$(kubectl get ns -o name | sed 's/namespace\///' | grep $NAMESPACE )" ]; then
+        echo "valid namespace was not referenced as param"
+        exit 1
+    fi
     kubectl proxy &
     kubectl get namespace $NAMESPACE -o json |jq '.spec = {"finalizers":[]}' | jq '.metadata.annotations={}' | jq '.metadata.finalizers=[]' >temp.json
     curl -k -H "Content-Type: application/json" -X PUT --data-binary @temp.json 127.0.0.1:8001/api/v1/namespaces/$NAMESPACE/finalize;
+}
+
+function kubectl_drop_node {
+    NODE=$1
+    if [ -z "$NODE" ] || [ -z "$(kubectl get node -o name | sed 's/node\///' | grep $NODE )" ]; then
+        echo "valid node was not referenced as param"
+        exit 1
+    fi
+
+    kubectl cordon $NODE
+    kubectl drain $NODE --force --ignore-daemonsets  --delete-emptydir-data
+    kubectl delete node $NODE --wait
+
 }
 
 beautify_ansible() {
