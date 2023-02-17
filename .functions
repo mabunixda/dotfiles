@@ -183,6 +183,7 @@ github_download() {
     curl -fOL "https://github.com/${org}/${project}/releases/download/${version}/${file}"
 
 }
+
 hashicorp_download() {
     project=$1
     version=$2
@@ -204,4 +205,183 @@ retag_containers() {
         docker tag "$d" "$l"
         docker push "$l"
     done
+}
+
+
+vault_login() {
+
+  VAULT_GITHUB_TOKEN_PATH="${VAULT_GITHUB_TOKEN_PATH:-$HOME/.vault_github_token}"
+  if [ -n "${VAULT_NAMESPACE}" ]; then
+    VAULT_NAMESPACE_PREFIX="/${VAULT_NAMESPACE}"
+  fi
+
+  if [[ ! -f "${VAULT_GITHUB_TOKEN_PATH}" ]]; then
+    echo "[ERR] No GitHub access token found at ${VAULT_GITHUB_TOKEN_PATH}"
+    return
+  fi
+
+  export VAULT_GITHUB_TOKEN="$(cat $VAULT_GITHUB_TOKEN_PATH)"
+  VAULT_PAYLOAD="{\"token\":\"${VAULT_GITHUB_TOKEN}\"}"
+  VAULT_TOKEN=$(curl -s -X POST -d ${VAULT_PAYLOAD} ${VAULT_ADDR}/v1${VAULT_NAMESPACE_PREFIX}/auth/github/login | jq -r .auth.client_token)
+  if ! grep -q "s." <<< $VAULT_TOKEN ; then
+    echo "[ERR] Vault token not retrieved."
+    return
+  fi
+  export VAULT_TOKEN
+}
+
+
+vault_ssh () {
+  if [[ -z "${1}" ]]; then
+    echo "[INFO] Usage: vault_ssh user@host [-p 2222]"
+    return
+  fi
+
+  if [[ "${1}" =~ ^-+ ]]; then
+    echo "[ERR] Additional SSH flags must be passed after the hostname. e.g. 'vssh user@host -p 2222'"
+    return
+  elif [[ "${1}" =~ ^[a-zA-Z]+@[a-zA-Z]+ ]]; then
+    SSH_USER=$(echo $1 | cut -d'@' -f1)
+    SSH_HOST=$(echo $1 | cut -d'@' -f2)
+  else
+    SSH_USER=$(whoami)
+    SSH_HOST=${1}
+  fi
+
+  SSH_CONFIG_USER=$(ssh -G "$SSH_HOST" | awk '$1 == "user" p{ print $2 }')
+  if [ -n "$SSH_CONFIG_USER" ]; then
+    SSH_USER=$SSH_CONFIG_USER
+  fi
+  VAULT_PRIVATE_SSH_KEY=${VAULT_PRIVATE_SSH_KEY:-$HOME/.ssh/id_ed25519_private}
+  VAULT_SIGNED_KEY="$HOME/.ssh/vault_signed_key.pub"
+
+  # sign the public key
+  vault_sign_key
+
+  # shift arguments one to the left to remove target address
+  shift 1
+
+  # construct an SSH command with the credentials, and append any extra args
+  ssh -A -i ${VAULT_SIGNED_KEY} -i ${VAULT_PRIVATE_SSH_KEY} ${SSH_USER}@${SSH_HOST} $@
+}
+
+vault_sign_key () {
+  VAULT_ADDR="${VAULT_ADDR:-https://vault.home.nitram.at}"
+  VAULT_MOUNT=${VAULT_MOUNT:-home_ssh}
+  VAULT_ROLE=${VAULT_ROLE:-signed}
+
+  if [ -n "${VAULT_NAMESPACE}" ]; then
+    VAULT_NAMESPACE_PREFIX="/${VAULT_NAMESPACE}"
+  fi
+
+
+  VAULT_PUBLIC_SSH_KEY=${VAULT_PUBLIC_SSH_KEY:-"$HOME/.ssh/id_ed25519_private.pub"}
+  VAULT_SIGNED_KEY=${VAULT_SIGNED_KEY:-"$HOME/.ssh/vault_signed_key.pub"}
+  SSH_USER=${SSH_USER:-ubuntu}
+
+  if [[ ! -n "${VAULT_TOKEN}" ]]; then
+    echo "[ERR] No vault access token found at ${VAULT_TOKEN}"
+    return
+  fi
+
+  export TMP_DIR=$(mktemp -d)
+  cat > "$(echo ${TMP_DIR}/ssh-ca.json)" << EOF
+{
+    "public_key": "$(cat ${VAULT_PUBLIC_SSH_KEY})",
+    "valid_principals": "${SSH_USER}"
+}
+EOF
+  if ! curl -s --fail -H "X-Vault-Token: ${VAULT_TOKEN}" -X POST -d @${TMP_DIR}/ssh-ca.json \
+      ${VAULT_ADDR}/v1${VAULT_NAMESPACE_PREFIX}/${VAULT_MOUNT}/sign/${VAULT_ROLE} | jq -r .data.signed_key > "${VAULT_SIGNED_KEY}" ; then
+    echo "[ERR] Failed to sign public key."
+  fi
+  chmod 0600 $VAULT_SIGNED_KEY
+  rm -rf $TMP_DIR
+}
+
+function vault_otp() {
+
+    VAULT_ADDR="${VAULT_ADDR:-https://vault.home.nitram.at}"
+    VAULT_MOUNT="${VAULT_MOUNT:-home_ssh}"
+    VAULT_ROLE="${VAULT_ROLE:-otp}"
+    SSH_USER="${SSH_USER:-ubuntu}"
+    ANSIBLE_INVENTORY=${ANSIBLE_INVENTORY:-~/Documents/private/infrastructure/inventory/lan-cluster/lan.yml}
+    if [ -n "${VAULT_NAMESPACE}" ]; then
+      VAULT_NAMESPACE_PREFIX="/${VAULT_NAMESPACE}"
+    fi
+
+    if [ -z "$VAULT_TOKEN" ]; then
+        echo "missing vault token!"
+        return
+    fi
+    HOSTNAME=$1
+    if [ -n "$2" ]; then
+        SSH_USER="$2"
+    fi
+    if [ -z "$VAULT_TOKEN" ]; then
+        echo "missing vault token!"
+        return
+    fi
+
+    IP=$(ansible-inventory -i "$ANSIBLE_INVENTORY" --host "$HOSTNAME" 2>/dev/null | jq -r '.ansible_host')
+
+    if [ -z "$IP" ]; then
+        IP=$(ssh -G "$HOSTNAME" | awk '$1 == "hostname" p{ print $2 }')
+    fi
+    CONFIGURED_USER=$(ssh -G "$HOSTNAME" | awk '$1 == "user" p{ print $2 }')
+    if [ -n "$CONFIGURED_USER" ]; then
+      SSH_USER=$CONFIGURED_USER
+    fi
+
+    if [ -z "$IP" ]; then
+        IP=$HOSTNAME
+    fi
+
+    VALIDATE=$(dig +short "$IP" || echo "")
+    if [ -n "$VALIDATE" ]; then
+        IP=$VALIDATE
+    fi
+
+
+    OTP=$(curl \
+            --silent \
+            --header "X-Vault-Token: $VAULT_TOKEN" \
+            --request POST \
+            --data "{ \"username\": \"$SSH_USER\", \"ip\": \"${IP}\" }" \
+            $VAULT_ADDR/v1${VAULT_NAMESPACE_PREFIX}/$VAULT_MOUNT/creds/$VAULT_ROLE \
+            | jq -r '.data.key')
+
+    echo $OTP
+
+}
+
+function nomad_login() {
+    if [ -z "$VAULT_TOKEN" ]; then
+      echo "No VAULT_TOKEN set"
+      return
+    fi
+    if [ -n "${VAULT_NAMESPACE}" ]; then
+      VAULT_NAMESPACE_PREFIX="/${VAULT_NAMESPACE}"
+    fi
+
+    VAULT_NOMAD_MOUNT=${VAULT_NOMAD_MOUNT:-nomad}
+    VAULT_NOMAD_ROLE="${VAULT_NOMAD_ROLE:-admin}"
+
+    NOMAD_ROLE_DATA=$(curl -s -H "X-Vault-Token: ${VAULT_TOKEN}" -X GET \
+      ${VAULT_ADDR}/v1${VAULT_NAMESPACE_PREFIX}/${VAULT_NOMAD_MOUNT}/creds/${VAULT_NOMAD_ROLE})
+
+    NOMAD_TOKEN=$(echo $NOMAD_ROLE_DATA | jq -r '.data.secret_id')
+
+    NOMAD_ACCESS_ID=$(echo $NOMAD_ROLE_DATA | jq -r '.data.accessor_id')
+
+    export NOMAD_TOKEN
+    export NOMAD_ACCESS_ID
+}
+
+function nomad_check() {
+  TOKEN=${NOMAD_ACCESS_ID:-}
+  if [ -n "$1" ]; then
+    TOKEN="$1"
+  fi
+  nomad acl token info $TOKEN
 }
