@@ -1,6 +1,6 @@
 .PHONY: all bin dotfiles etc test shellcheck
 
-all: bin dotfiles etc zsh
+all: dotfiles zsh 
 
 bin:
 	# add aliases for things in bin

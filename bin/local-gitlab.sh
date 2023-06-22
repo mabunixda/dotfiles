@@ -18,16 +18,17 @@ fi
 [ -f .gitlab-ci.yml ] || die "Please execute from a directory with a .gitlab-ci.yml"
 [ -d .git ] || die "Please execute this from a directory that is in git, has a origin"
 
+set -ex
 
 if [ $# -eq 0 ]
 then
   # run all stages
-  STAGES=$(cat .gitlab-ci.yml | yq -y .stages | sed -e 's?- ??g' | tr '\n' ' ' )
+  STAGES=$(cat .gitlab-ci.yml | yq e .stages | sed -e 's?- ??g' | tr '\n' ' ' )
 else
   STAGES="$@"
 fi
 
-STEPS=$(yq -rc 'keys' .gitlab-ci.yml | jq -r .[])
+STEPS=$(yq -rc e 'keys' .gitlab-ci.yml | jq -r .[])
 echo $STEPS
 # AUTH=$(jq -r '.auths["...myregistry..."].auth' < ~/.docker/config.json  | base64 -d)
 #IFS=:
@@ -50,7 +51,7 @@ for stage in $STAGES
 do
   for step in $STEPS
   do
-    stage_check=$(yq -rc ".$step.stage==\"$stage\"" .gitlab-ci.yml )
+    stage_check=$(yq -rc e ".$step.stage==\"$stage\"" .gitlab-ci.yml )
 
     if [ "$stage_check" != "true" ]; then
       continue

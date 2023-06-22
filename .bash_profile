@@ -6,7 +6,7 @@ function join_by { local IFS="$1"; shift; echo "$*"; }
 # Load the shell dotfiles, and then some:
 # * ~/.path can be used to extend `$PATH`.
 # * ~/.extra can be used for other settings you don’t want to commit.
-for file in ~/.{bash_prompt,aliases,functions,path,dockerfunctions,ssh-agent,exports}; do
+for file in ~/.{prompt,aliases,functions,path,dockerfunctions,ssh-agent,exports}; do
 	if [[ -r "$file" ]] && [[ -f "$file" ]]; then
 		# shellcheck source=/dev/null
 		source "$file"

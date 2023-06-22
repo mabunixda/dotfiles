@@ -24,7 +24,7 @@ plugins=(git
 source $ZSH/oh-my-zsh.sh
 
 # load subitems...
-for file in ~/.{,aliases,functions,path,dockerfunctions,ssh-agent,exports}; do
+for file in ~/.{,aliases,prompt,functions,path,dockerfunctions,ssh-agent,exports}; do
 	if [[ -r "$file" ]] && [[ -f "$file" ]]; then
 		source "$file"
 	fi

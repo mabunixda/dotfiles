@@ -212,14 +212,13 @@ vault_login() {
 
   VAULT_GITHUB_TOKEN_PATH="${VAULT_GITHUB_TOKEN_PATH:-$HOME/.vault_github_token}"
   if [ -n "${VAULT_NAMESPACE}" ]; then
-    VAULT_NAMESPACE_PREFIX="/${VAULT_NAMESPACE}"
+    export VAULT_NAMESPACE_PREFIX="/${VAULT_NAMESPACE}"
   fi
 
   if [[ ! -f "${VAULT_GITHUB_TOKEN_PATH}" ]]; then
     echo "[ERR] No GitHub access token found at ${VAULT_GITHUB_TOKEN_PATH}"
     return
   fi
-
   export VAULT_GITHUB_TOKEN="$(cat $VAULT_GITHUB_TOKEN_PATH)"
   VAULT_PAYLOAD="{\"token\":\"${VAULT_GITHUB_TOKEN}\"}"
   VAULT_TOKEN=$(curl -s -X POST -d ${VAULT_PAYLOAD} ${VAULT_ADDR}/v1${VAULT_NAMESPACE_PREFIX}/auth/github/login | jq -r .auth.client_token)
@@ -232,26 +231,26 @@ vault_login() {
 
 
 vault_ssh () {
+
+  set -ex
+
   if [[ -z "${1}" ]]; then
     echo "[INFO] Usage: vault_ssh user@host [-p 2222]"
     return
   fi
 
+  SSH_USER=$(ssh -G "$SSH_HOST" | awk '$1 == "user" p{ print $2 }')
   if [[ "${1}" =~ ^-+ ]]; then
-    echo "[ERR] Additional SSH flags must be passed after the hostname. e.g. 'vssh user@host -p 2222'"
+    echo "[ERR] Additional SSH flags must be passed after the hostname. e.g. 'vault_ssh user@host -p 2222'"
     return
-  elif [[ "${1}" =~ ^[a-zA-Z]+@[a-zA-Z]+ ]]; then
+  fi
+  if [[ "${1}" =~ ^[a-zA-Z0-9]+@[a-zA-Z0-9\.]+ ]]; then
     SSH_USER=$(echo $1 | cut -d'@' -f1)
     SSH_HOST=$(echo $1 | cut -d'@' -f2)
   else
-    SSH_USER=$(whoami)
     SSH_HOST=${1}
   fi
 
-  SSH_CONFIG_USER=$(ssh -G "$SSH_HOST" | awk '$1 == "user" p{ print $2 }')
-  if [ -n "$SSH_CONFIG_USER" ]; then
-    SSH_USER=$SSH_CONFIG_USER
-  fi
   VAULT_PRIVATE_SSH_KEY=${VAULT_PRIVATE_SSH_KEY:-$HOME/.ssh/id_ed25519_private}
   VAULT_SIGNED_KEY="$HOME/.ssh/vault_signed_key.pub"
 
@@ -260,7 +259,6 @@ vault_ssh () {
 
   # shift arguments one to the left to remove target address
   shift 1
-
   # construct an SSH command with the credentials, and append any extra args
   ssh -A -i ${VAULT_SIGNED_KEY} -i ${VAULT_PRIVATE_SSH_KEY} ${SSH_USER}@${SSH_HOST} $@
 }
@@ -296,15 +294,16 @@ EOF
     echo "[ERR] Failed to sign public key."
   fi
   chmod 0600 $VAULT_SIGNED_KEY
-  rm -rf $TMP_DIR
+#  rm -rf $TMP_DIR
 }
 
 function vault_otp() {
 
+
     VAULT_ADDR="${VAULT_ADDR:-https://vault.home.nitram.at}"
     VAULT_MOUNT="${VAULT_MOUNT:-home_ssh}"
     VAULT_ROLE="${VAULT_ROLE:-otp}"
-    SSH_USER="${SSH_USER:-ubuntu}"
+    SSH_USER="${SSH_USER:-$(ssh -G "$HOSTNAME" | awk '$1 == "user" p{ print $2 }')}"
     ANSIBLE_INVENTORY=${ANSIBLE_INVENTORY:-~/Documents/private/infrastructure/inventory/lan-cluster/lan.yml}
     if [ -n "${VAULT_NAMESPACE}" ]; then
       VAULT_NAMESPACE_PREFIX="/${VAULT_NAMESPACE}"
@@ -327,10 +326,6 @@ function vault_otp() {
 
     if [ -z "$IP" ]; then
         IP=$(ssh -G "$HOSTNAME" | awk '$1 == "hostname" p{ print $2 }')
-    fi
-    CONFIGURED_USER=$(ssh -G "$HOSTNAME" | awk '$1 == "user" p{ print $2 }')
-    if [ -n "$CONFIGURED_USER" ]; then
-      SSH_USER=$CONFIGURED_USER
     fi
 
     if [ -z "$IP" ]; then
@@ -384,4 +379,18 @@ function nomad_check() {
     TOKEN="$1"
   fi
   nomad acl token info $TOKEN
+}
+
+
+function github_deep_clone() {
+
+  CNTX=$1; NAME=$2; PAGE=1
+  if [ "$CNTX" != "user" ] && [ "$CNTX" != "orgs" ]; then
+	  echo "context must be user|orgs"
+	  return
+	 fi
+  curl "https://api.github.com/$CNTX/$NAME/repos?page=$PAGE&per_page=100" |
+	  grep -e 'clone_url*' |
+	    cut -d \" -f 4 |
+	      xargs -L1 git clone
 }
