@@ -40,6 +40,8 @@ function kubectl_delete_ns {
     kubectl proxy &
     kubectl get namespace $NAMESPACE -o json |jq '.spec = {"finalizers":[]}' | jq '.metadata.annotations={}' | jq '.metadata.finalizers=[]' >temp.json
     curl -k -H "Content-Type: application/json" -X PUT --data-binary @temp.json 127.0.0.1:8001/api/v1/namespaces/$NAMESPACE/finalize;
+    pid=$(pgrep kubectl)
+    kill $pid
 }
 
 function kubectl_drop_node {
@@ -389,8 +391,40 @@ function github_deep_clone() {
 	  echo "context must be user|orgs"
 	  return
 	 fi
-  curl "https://api.github.com/$CNTX/$NAME/repos?page=$PAGE&per_page=100" |
-	  grep -e 'clone_url*' |
-	    cut -d \" -f 4 |
-	      xargs -L1 git clone
+   if [ -n "$API_TOKEN" ]; then
+      HEADER="Authorization: Bearer ${API_TOKEN}"
+   fi
+   for repo in $(curl -H "$HEADER" -s "https://api.github.com/${CNTX}/${NAME}/repos?page=1&per_page=100"  | jq -r -c -M '.[] | { name:.name, url:.clone_url  }'); do
+      name=$(echo $repo | jq -r '.name')
+      url=$(echo $repo | jq -r '.url')
+      if [ -d "$name" ]; then
+        pushd $name 
+        git fetch -v --all
+        git switch main || git switch master
+        git pull
+        popd
+      else
+        git clone $url $name
+      fi
+    done
+
+}
+
+function apply_terraform_token() { 
+  token=$1
+  hostname=${2:-app.terraform.io}
+  if [ -z "$token" ]; then
+    echo "no token provided"
+    return
+  fi
+  export TFE_TOKEN=$token
+  cat > "$HOME/.terraform.d/credentials.tfrc.json" <<EOF
+{
+  "credentials": {
+    "${hostname}": {
+      "token": "${token}"
+    }
+  }
+}
+EOF
 }

@@ -197,12 +197,16 @@
 	program = gpg
 
 
-[credential]
-	helper = store --file ~/.git-credentials
-
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
+
+#
+# https://github.com/Luzifer/git-credential-vault
+# 
+[credential]
+	helper = vault --vault-path-prefix kv/data/git-credentials
+
 

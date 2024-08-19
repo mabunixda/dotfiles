@@ -1,6 +1,6 @@
 .PHONY: all bin dotfiles etc test shellcheck
 
-all: dotfiles zsh 
+all: dotfiles zsh  vault_git
 
 bin:
 	# add aliases for things in bin
@@ -57,6 +57,8 @@ zsh:
 		git pull; \
 	fi
 
+vault_git:
+	curl -sSfL "https://github.com/Luzifer/git-credential-vault/releases/download/v0.1.0/git-credential-vault_linux_amd64.tar.gz" | tar -xz -C ~/bin/
 
 test: shellcheck
 

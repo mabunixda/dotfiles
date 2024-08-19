@@ -72,3 +72,4 @@ chpwd_functions=( ${chpwd_functions} chpwd_profiles )
 	tr ' ' '\n')" scp sftp ssh
 
 autoload -U +X bashcompinit && bashcompinit
+
