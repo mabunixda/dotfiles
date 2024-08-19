@@ -1,2 +1,0 @@
-bin/hostess filter=lfs diff=lfs merge=lfs -text
-bin/kompose filter=lfs diff=lfs merge=lfs -text
