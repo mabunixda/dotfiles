@@ -37,6 +37,10 @@ for file in $(find ${HOME} -maxdepth 1 -name ".extra.*"); do
 done
 unset file
 
+if [ $(command -v direnv) ]; then
+   eval "$(direnv hook zsh)"
+fi
+
 function chpwd_profiles() {
     local profile context
     local -i reexecute
