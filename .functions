@@ -397,18 +397,47 @@ function github_deep_clone() {
    for repo in $(curl -H "$HEADER" -s "https://api.github.com/${CNTX}/${NAME}/repos?page=1&per_page=100"  | jq -r -c -M '.[] | { name:.name, url:.clone_url  }'); do
       name=$(echo $repo | jq -r '.name')
       url=$(echo $repo | jq -r '.url')
-      if [ -d "$name" ]; then
-        pushd $name 
-        git fetch -v --all
-        git switch main || git switch master
-        git pull
-        popd
-      else
-        git clone $url $name
-      fi
+      github_clone $url
     done
-
 }
+
+function github_clone() { 
+  url=$1
+  basefolder="$HOME/Documents"
+  if [ -z "$url" ]; then
+    echo "no url provided"
+    return
+  fi
+  name=$(basename $url | sed 's/\.git$//')
+  if [[ $url == https* ]]; then
+    server=$(echo $url | awk -F'/' '{print $3}')
+    org=$(echo $url | awk -F'/' '{print $4}')
+  else 
+    server=$(echo $url | sed 's/.*@//' | awk -F':' '{print $1}' )
+    org=$(echo $url | awk -F':' '{print $2}' | awk -F'/' '{print $1}')
+  fi
+
+  if [ -z "$org" ]; then
+    echo "no org found in url $url"
+    return
+  fi
+
+  mkdir -p "$basefolder/$server/$org"
+  if [ ! -d "$basefolder/$server/$org/$name" ]; then
+    git clone "$url" "$basefolder/$server/$org/$name"
+    pushd "$basefolder/$server/$org/$name"
+    return
+  fi
+  
+  pushd "$basefolder/$server/$org/$name"
+  git fetch -v --all
+  git switch main || git switch master
+  git pull
+  
+
+  
+}
+
 
 function apply_terraform_token() { 
   token=$1

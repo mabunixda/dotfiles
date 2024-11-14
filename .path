@@ -9,6 +9,9 @@ export GOPATH="${HOME}/.go"
 
 export PATH=$GOPATH/bin:$HOME/.local/bin/:$HOME/bin/:/usr/local/bin:/usr/local/go/bin:$PATH:$GOPATH/bin:/usr/share/bcc/tools:/sbin
 
+if [ -f "$PWD/.env" ]; then
+  source "$PWD/.env"
+fi
 
 if [ -d "$HOME/google-cloud-sdk/bin" ]; then
   export PATH="$PATH:$HOME/google-cloud-sdk/bin"

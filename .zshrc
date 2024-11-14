@@ -77,3 +77,4 @@ chpwd_functions=( ${chpwd_functions} chpwd_profiles )
 
 autoload -U +X bashcompinit && bashcompinit
 
+export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
