@@ -3,6 +3,7 @@
 all: dotfiles zsh  vault_git
 
 bin:
+	mkdir ${HOME}/bin
 	# add aliases for things in bin
 	for file in $(shell find $(CURDIR)/bin -type f -not -name "*-backlight" -not -name ".*.swp"); do \
 		f=$$(basename $$file); \
@@ -19,6 +20,7 @@ bin:
 	sudo ln -sf $(CURDIR)/bin/browser-exec /usr/local/bin/xdg-open
 
 dotfiles:
+	mkdir ${HOME}/bin
 	# add aliases for dotfiles
 	for file in $(shell find $(CURDIR) -name ".*" -not -name ".gitconfig" -not -name ".ssh" -not -name ".gitignore" -not -name ".travis.yml" -not -name ".git" -not -name ".*.swp" -not -name ".travis.yml" -not -name ".irssi" -not -name ".gnupg" -not -name ".config"); do \
         if [ -f $$file ]; then \

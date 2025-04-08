@@ -1,6 +1,5 @@
 export ZSH="$HOME/.oh-my-zsh"
-# candy
-ZSH_THEME="cloud"
+ZSH_THEME="candy"
 
 
 plugins=(git
@@ -78,3 +77,6 @@ chpwd_functions=( ${chpwd_functions} chpwd_profiles )
 autoload -U +X bashcompinit && bashcompinit
 
 export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
+
+# Added by Windsurf
+export PATH="/Users/mbuchleitner/.codeium/windsurf/bin:$PATH"
