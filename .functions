@@ -95,6 +95,11 @@ git_status() {
     find $PWD/* -type d -name ".git" -not -name "*build*"  -exec /bin/bash -c '(echo `dirname "{}"` && cd `dirname "{}"` && git status -s && echo "" ) ' \;
 }
 
+setgit() { 
+  export GIT_COMITTER_EMAIL=martin@nitram.at
+  export GIT_AUTHOR_EMAIL=martin@nitram.at
+}
+
 init_vagrant() {
 
     name=$(basename `pwd`)
