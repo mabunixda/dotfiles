@@ -4,7 +4,7 @@ ZSH_THEME="candy"
 
 plugins=(git
         ansible
-        docker
+	    podman
         golang
         iterm2
         kitchen
@@ -16,6 +16,7 @@ plugins=(git
         terraform
         tmux
         ubuntu
+        profiles
         )
 
 source $ZSH/oh-my-zsh.sh
@@ -44,6 +45,7 @@ function chpwd_profiles() {
     local profile context
     local -i reexecute
 
+    
     context=":chpwd:profiles:$PWD"
     zstyle -s "$context" profile profile || profile='default'
     zstyle -T "$context" re-execute && reexecute=1 || reexecute=0
@@ -67,6 +69,9 @@ function chpwd_profiles() {
 # Add the chpwd_profiles() function to the list called by chpwd()!
 chpwd_functions=( ${chpwd_functions} chpwd_profiles )
 
+chpwd_profiles
+
+zstyle ':chpwd:profiles:*' re-execute false
 
 [[ -e "$HOME/.ssh/config" ]] && complete -o "default" \
 	-o "nospace" \
@@ -77,6 +82,16 @@ chpwd_functions=( ${chpwd_functions} chpwd_profiles )
 autoload -U +X bashcompinit && bashcompinit
 
 export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
+export JAVA_HOME=/opt/homebrew/opt/openjdk@21/
 
 # Added by Windsurf
 export PATH="/Users/mbuchleitner/.codeium/windsurf/bin:$PATH"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/mbuchleitner/.lmstudio/bin"
+# End of LM Studio CLI section
+

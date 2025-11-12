@@ -47,3 +47,8 @@ done
 complete -C /usr/local/bin/vault vault
 
 complete -C /opt/homebrew/bin/mc mc
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/mbuchleitner/.lmstudio/bin"
+# End of LM Studio CLI section
+

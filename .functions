@@ -74,23 +74,6 @@ kubesec ()
     -F file=@"${FILE}" \
     https://kubesec.io/ | jq
 }
-setgit() {
-    MOD="$1"
-    shift
-    if [ -z "$MOD" ]; then
-        MOD="private"
-    fi
-    if [ ! -f  "${HOME}/.gitconfig.$MOD" ]; then
-        echo "customisation $MOD does not exit!"
-        return
-    fi
-    echo -n "reinit gitconfig ..."
-    rm -f $HOME/.gitconfig
-    cat "$HOME/.gitconfig.core" > "$HOME/.gitconfig"
-    echo -n " and adding $MOD ... "
-    cat "$HOME/.gitconfig.$MOD" >> "$HOME/.gitconfig"
-    echo "done"
-}
 
 vagrant_ssh() {
     name=$(vagrant  status | head -n 3 | tail -n 1 | awk -F' ' '{print $1}')
@@ -111,6 +94,7 @@ generate_ssh_config() {
 git_status() {
     find $PWD/* -type d -name ".git" -not -name "*build*"  -exec /bin/bash -c '(echo `dirname "{}"` && cd `dirname "{}"` && git status -s && echo "" ) ' \;
 }
+
 init_vagrant() {
 
     name=$(basename `pwd`)
@@ -234,8 +218,6 @@ vault_login() {
 
 vault_ssh () {
 
-  set -ex
-
   if [[ -z "${1}" ]]; then
     echo "[INFO] Usage: vault_ssh user@host [-p 2222]"
     return
@@ -257,12 +239,12 @@ vault_ssh () {
   VAULT_SIGNED_KEY="$HOME/.ssh/vault_signed_key.pub"
 
   # sign the public key
-  vault_sign_key
+  vault_sign_key $SSH_USER
 
   # shift arguments one to the left to remove target address
   shift 1
   # construct an SSH command with the credentials, and append any extra args
-  ssh -A -i ${VAULT_SIGNED_KEY} -i ${VAULT_PRIVATE_SSH_KEY} ${SSH_USER}@${SSH_HOST} $@
+  SSH_AUTH_SOCK= ssh -A -i ${VAULT_SIGNED_KEY} -i ${VAULT_PRIVATE_SSH_KEY} ${SSH_USER}@${SSH_HOST} $@
 }
 
 vault_sign_key () {
@@ -274,27 +256,42 @@ vault_sign_key () {
     VAULT_NAMESPACE_PREFIX="/${VAULT_NAMESPACE}"
   fi
 
-
   VAULT_PUBLIC_SSH_KEY=${VAULT_PUBLIC_SSH_KEY:-"$HOME/.ssh/id_ed25519_private.pub"}
   VAULT_SIGNED_KEY=${VAULT_SIGNED_KEY:-"$HOME/.ssh/vault_signed_key.pub"}
   SSH_USER=${SSH_USER:-ubuntu}
+  if [ -n "$1" ]; then
+    SSH_USER="$1"
+  fi
 
   if [[ ! -n "${VAULT_TOKEN}" ]]; then
     echo "[ERR] No vault access token found at ${VAULT_TOKEN}"
     return
   fi
 
-  export TMP_DIR=$(mktemp -d)
+  # export TMP_DIR=$(mktemp -d)
+  export TMP_DIR="${TMP_DIR:-/tmp/vault_ssh}"
+  mkdir -p ${TMP_DIR}
   cat > "$(echo ${TMP_DIR}/ssh-ca.json)" << EOF
 {
     "public_key": "$(cat ${VAULT_PUBLIC_SSH_KEY})",
     "valid_principals": "${SSH_USER}"
 }
 EOF
-  if ! curl -s --fail -H "X-Vault-Token: ${VAULT_TOKEN}" -X POST -d @${TMP_DIR}/ssh-ca.json \
-      ${VAULT_ADDR}/v1${VAULT_NAMESPACE_PREFIX}/${VAULT_MOUNT}/sign/${VAULT_ROLE} | jq -r .data.signed_key > "${VAULT_SIGNED_KEY}" ; then
+
+SIGN_REQUEST=$(curl -s --fail -X PUT \
+                      -H "X-Vault-Request: true" \
+                      -H "X-Vault-Token: ${VAULT_TOKEN}" -d @${TMP_DIR}/ssh-ca.json \
+                    ${VAULT_ADDR}/v1${VAULT_NAMESPACE_PREFIX}/${VAULT_MOUNT}/sign/${VAULT_ROLE} | jq -r '.data.signed_key')
+SIGN_RESULT=$?
+  if [ "$SIGN_RESULT" != "0" ]; then
     echo "[ERR] Failed to sign public key."
+    return
   fi
+  if [[ -z "${SIGN_REQUEST}" ]]; then
+    echo "[ERR] No signed key returned from Vault."
+    return
+  fi
+  echo "${SIGN_REQUEST}" > ${VAULT_SIGNED_KEY}
   chmod 0600 $VAULT_SIGNED_KEY
 #  rm -rf $TMP_DIR
 }

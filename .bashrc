@@ -102,3 +102,8 @@ if [[ -f "${HOME}/.bash_profile" ]]; then
 	# shellcheck source=/dev/null
 	source "${HOME}/.bash_profile"
 fi
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/mbuchleitner/.lmstudio/bin"
+# End of LM Studio CLI section
+

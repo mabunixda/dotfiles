@@ -28,7 +28,7 @@ dotfiles:
 	    	ln -sfn $$file $(HOME)/$$f; \
         fi; \
 	done; \
-	ln -sfn $(CURDIR)/.gitconfig $(HOME)/.gitconfig.core; \
+	ln -sfn $(CURDIR)/.gitconfig $(HOME)/.gitconfig; \
         ln -sfn $(CURDIR)/.vim $(HOME)/.vim; \
 	mkdir -p $(HOME)/.gnupg/; \
 	ln -sfn $(CURDIR)/.gnupg/gpg.conf $(HOME)/.gnupg/gpg.conf; \
