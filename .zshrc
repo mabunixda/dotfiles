@@ -41,6 +41,10 @@ if [ $(command -v direnv) ]; then
    eval "$(direnv hook zsh)"
 fi
 
+if [ $(command -v mise) ]; then
+  eval "$(mise activate zsh --shims)"
+fi
+
 function chpwd_profiles() {
     local profile context
     local -i reexecute
