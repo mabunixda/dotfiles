@@ -172,7 +172,6 @@ github_download() {
     version=$(curl -sX GET https://api.github.com/repos/$org/$project/releases/latest | grep 'tag_name' | cut -d\" -f4)
     echo "Latest version on $project github repo is $version"
     curl -fOL "https://github.com/${org}/${project}/releases/download/${version}/${file}"
-
 }
 
 hashicorp_download() {

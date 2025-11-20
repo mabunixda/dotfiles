@@ -1,4 +1,5 @@
 export ZSH="$HOME/.oh-my-zsh"
+
 ZSH_THEME="candy"
 
 
@@ -85,17 +86,11 @@ zstyle ':chpwd:profiles:*' re-execute false
 
 autoload -U +X bashcompinit && bashcompinit
 
-export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
-export JAVA_HOME=/opt/homebrew/opt/openjdk@21/
-
-# Added by Windsurf
-export PATH="/Users/mbuchleitner/.codeium/windsurf/bin:$PATH"
-
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/mbuchleitner/.lmstudio/bin"
+export PATH="$PATH:${HOME}/.lmstudio/bin"
 # End of LM Studio CLI section
 

@@ -9,6 +9,8 @@ export GOPATH="${HOME}/.go"
 
 export PATH=$GOPATH/bin:$HOME/.local/bin/:$HOME/bin/:/usr/local/bin:/usr/local/go/bin:$PATH:$GOPATH/bin:/usr/share/bcc/tools:/sbin
 
+export PATH=$PATH:/opt/atlassian-plugin-sdk/bin:/opt/atlassian-plugin-sdk/apache-maven-3.9.8/bin
+
 if [ -f "$PWD/.env" ]; then
   source "$PWD/.env"
 fi
