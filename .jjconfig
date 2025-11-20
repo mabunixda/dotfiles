@@ -20,7 +20,7 @@ conflict-marker-style = "git"
 private-commits = "description(glob:'wip:*') | description(glob:'private:*')"
 
 [templates]
-git_push_bookmark = '"martinvonz/push-" ++ change_id.short()'
+git_push_bookmark = '"mabunixda/push-" ++ change_id.short()'
 
 [aliases]
 l = ['log', '--no-pager', '--reversed']
