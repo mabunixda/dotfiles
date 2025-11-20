@@ -16,8 +16,8 @@ pager = "bat -p"
 diff-formatter = ":git"
 conflict-marker-style = "git"
 
-[templates]
-git_push_bookmark = "mabunixda"
+# [templates]
+# git_push_bookmark = "mabunixda"
 
 [aliases]
 l = ['log', '--no-pager', '--reversed']
