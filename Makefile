@@ -33,6 +33,8 @@ dotfiles:
 	mkdir -p $(HOME)/.gnupg/; \
 	ln -sfn $(CURDIR)/.gnupg/gpg.conf $(HOME)/.gnupg/gpg.conf; \
 	ln -sfn $(CURDIR)/.gnupg/gpg-agent.conf $(HOME)/.gnupg/gpg-agent.conf;
+	mkdir -p ${HOME}/.config/jj
+	ln -sfn ${HOME}/.jjconfig ${HOME}/.config/jj/config.toml
 #	ln -fn $(CURDIR)/gitignore $(HOME)/.gitignore;
 
 
