@@ -43,7 +43,7 @@ if [ $(command -v direnv) ]; then
 fi
 
 if [ $(command -v mise) ]; then
-  eval "$(mise activate zsh --shims)"
+  eval "$(mise activate zsh)"
 fi
 
 function chpwd_profiles() {
