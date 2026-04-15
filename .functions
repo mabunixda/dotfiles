@@ -96,8 +96,12 @@ git_status() {
 }
 
 setgit() { 
-  export GIT_COMITTER_EMAIL=martin@nitram.at
-  export GIT_AUTHOR_EMAIL=martin@nitram.at
+  echo "exporting git config..."
+  export EMAIL="martin@nitram.at"
+  export GIT_AUTHOR_NAME="Martin Buchleitner"
+  export GIT_AUTHOR_EMAIL="$EMAIL"
+  export GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"
+  export GIT_COMMITTER_EMAIL="$EMAIL"	
 }
 
 init_vagrant() {

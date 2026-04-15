@@ -25,3 +25,4 @@ fi
 
 # update cdpath
 export CDPATH=${CDPATH}:$GOPATH/src/github.com:$GOPATH/src/golang.org:$GOPATH/src
+export PATH="$HOME/.local/bin:$PATH"
